@@ -3,14 +3,15 @@ name: Theme CI
 on:
   workflow_dispatch:
   push:
+    branches:
+      [master, dev]
     paths-ignore:
       - '.github/**'
       - 'docs/**'
       - 'build/**'
       - 'README.md'
       - 'LICENSE'
-    branches:
-      [master, dev]
+      - '**/argoDeploy.json'
   pull_request:
     branches:
       [master, dev]
@@ -20,6 +21,7 @@ on:
       - 'build/**'
       - 'README.md'
       - 'LICENSE'
+      - '**/argoDeploy.json'
 
 jobs:
   ci:
