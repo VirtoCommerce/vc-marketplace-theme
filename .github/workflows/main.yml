@@ -35,9 +35,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup sonarqube
-        uses: warchant/setup-sonar-scanner@v3
-
       - name: Get Image Version
         uses: VirtoCommerce/vc-github-actions/get-image-version@master
         id: image
@@ -59,11 +56,6 @@ jobs:
       - name: Get changelog
         id: changelog
         uses: VirtoCommerce/vc-github-actions/changelog-generator@master
-
-      - name: SonarCloud Scan
-        uses: VirtoCommerce/vc-github-actions/sonar-theme@master
-        with:
-          projectVersion: ${{ env.VERSION_SUFFIX }}
 
       - name: Build
         if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' }}
