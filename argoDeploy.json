@@ -1,17 +1,13 @@
 {
     "artifactKey": "B2B_THEME_URL",
-    "deployRepo": "vc-webstore-deploy",
+    "deployRepo": "vc-deploy-dev",
+    "cmPath": "platform-dev/overlays/marketplace/themes-cm.yaml",
     "dev": {
-        "deployAppName": "webstore-dev",
-        "deployBranch": "dev"
-    },
-    "qa": {
-        "deployAppName": "webstore-qa",
-        "deployBranch": "qa"
-    },
-    "prod": {
-        "deployAppName": "webstore-demo",
-        "deployBranch": "master"
-    },
-    "cmPath": "webstore-app/resources/deployment-cm.yaml"
+        "deployAppName": "vcplatform-dev",
+        "deployBranch": "marketplace",
+        "environmentId" : "dev",
+        "environmentName" : "Development",
+        "environmentType" : "development",
+        "environmentUrl" : "https://vendor-portal.dev.govirto.com/"
+    }
 }
