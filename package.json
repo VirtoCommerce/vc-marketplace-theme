@@ -1,18 +1,20 @@
 {
   "version": "1.14.0",
-  "name": "vc-demo-theme-b2b",
+  "name": "vc-marketplace-theme",
   "author": "VirtoCommerce",
-  "description": "B2B theme for Storefront",
+  "description": "B2B marketplace theme for Storefront",
   "private": true,
   "tags": [
     "virtocommerce",
     "theme",
-    "b2b"
+    "b2b",
+    "marketplace"
   ],
   "keywords": [
     "virtocommerce",
     "theme",
-    "b2b"
+    "b2b",
+    "marketplace"
   ],
   "dependencies": {
     "bootstrap": "^4.5.3",
