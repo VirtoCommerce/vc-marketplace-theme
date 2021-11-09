@@ -7,7 +7,7 @@
                 </div>
             </div>
         </div>
-        {% for variant in product.variants %}
+        {% for variant in product.variants  | where:"IsBuyable","==","true" %}
             <div class="card-body {% unless forloop.last %}border-bottom border-gray-200{% endunless %}">
                 <div class="row">
                     <div class="col">
