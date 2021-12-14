@@ -1,10 +1,10 @@
 {
     "artifactKey": "B2B_THEME_URL",
-    "deployRepo": "vc-deploy-dev",
-    "cmPath": "platform-dev/overlays/marketplace/themes-cm.yaml",
+    "deployRepo": "vc-deploy-marketplace",
+    "cmPath": "marketplace-app/resources/themes-cm.yaml",
     "dev": {
         "deployAppName": "vcplatform-dev",
-        "deployBranch": "marketplace",
+        "deployBranch": "dev",
         "environmentId" : "dev",
         "environmentName" : "Development",
         "environmentType" : "development",

@@ -1,4 +1,4 @@
-# v1.0
+# v1.3.0-marketplace
 
 name: VC deployment
 on:
@@ -7,16 +7,25 @@ on:
       artifactUrl: 
         description: 'Full link to artifact docker image or artifact download url'
         required: true
-      deployBranch: 
-        description: 'ArgoCd branch name'
+      deployEnvironment: 
+        description: 'Deployment environment type. Allowed values: dev, qa, prod'
         required: true
         default: 'dev'
+      deployConfigPath:
+        description: 'Full path to argoDeploy.json'
+        required: true
+        default: 'argoDeploy.json'
+      jiraKeys:
+        description: 'Deployed artifact Jira keys (for cycle time report)'
+        required: false
+        default: ''
 
 jobs:
   cd:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+      ARGO_SERVER: 'argo.govirto.com'
 
     steps: 
 
@@ -24,7 +33,8 @@ jobs:
       uses: VirtoCommerce/vc-github-actions/get-deploy-param@master
       id: deployConfig
       with:
-        envName: ${{ github.event.inputs.deployBranch }}
+        envName: ${{ github.event.inputs.deployEnvironment }}
+        deployConfigPath: ${{ github.event.inputs.deployConfigPath }}
 
     - name: Start deployment
       uses: bobheadxi/deployments@master
@@ -32,7 +42,7 @@ jobs:
       with:
         step: start
         token: ${{ secrets.GITHUB_TOKEN }}
-        env: Development
+        env: ${{ steps.deployConfig.outputs.environmentName }}
         no_override: false
 
     - name: Update deployment-cm
@@ -47,27 +57,21 @@ jobs:
         cmPath: ${{ steps.deployConfig.outputs.cmPath }}
 
     - name: Wait for environment is up
-      shell: pwsh
-      timeout-minutes: 15
-      run: | 
-        do {
-          Start-Sleep -s 15
-          $statusBage = (Invoke-WebRequest -Uri "https://argo.govirto.com/api/badge?name=${{ steps.deployConfig.outputs.deployAppName }}").Content
-          
-          $syncedAndHealthy = $statusBage.Contains('>Healthy<') -and $statusBage.Contains('>Synced<')
-          if (-not $syncedAndHealthy) {
-            Write-Host "Sync pending..."
-          }
-        }
-        while (-not $syncedAndHealthy)
+      uses: VirtoCommerce/vc-github-actions/vc-argocd-cli@master
+      id: argocd-cli
+      with:
+        server: ${{env.ARGO_SERVER}}
+        username: ${{ secrets.ARGOCD_LOGIN }}
+        password: ${{ secrets.ARGOCD_PASSWORD }}
+        command: app wait ${{ steps.deployConfig.outputs.deployAppName }}
 
-    - name: BUILD_STATE::successful
+    - name: DEPLOY_STATE::successful
       if: success()
-      run: echo "BUILD_STATE=successful" >> $GITHUB_ENV
+      run: echo "DEPLOY_STATE=successful" >> $GITHUB_ENV
 
-    - name: BUILD_STATE::failed
+    - name: DEPLOY_STATE::failed
       if: failure()
-      run: echo "BUILD_STATE=failed"  >> $GITHUB_ENV
+      run: echo "DEPLOY_STATE=failed"  >> $GITHUB_ENV
 
     - name: Update GitHub deployment status
       uses: bobheadxi/deployments@master

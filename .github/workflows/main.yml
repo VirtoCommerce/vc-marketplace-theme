@@ -1,4 +1,4 @@
-# v1.4.vc-demo-theme
+# v1.4.vc-theme-marketplace
 name: Theme CI
 on:
   workflow_dispatch:
@@ -30,7 +30,10 @@ jobs:
       SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
       GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
       BLOB_SAS: ${{ secrets.BLOB_TOKEN }}
-      VERSION_SUFFIX: ""
+      VERSION_SUFFIX: ''
+    outputs:
+      artifactUrl: ${{ steps.blobRelease.outputs.packageUrl }}
+
 
     steps:
       - uses: actions/checkout@v2
@@ -108,3 +111,19 @@ jobs:
           workflow: VC deployment
           token: ${{ secrets.REPO_TOKEN }}
           inputs: '{ "artifactUrl": "${{ steps.publish.outputs.blobUrl }}" }'
+
+  dev_cd:
+    if: github.ref == 'refs/heads/dev' || (github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/master')
+    needs: ci
+    runs-on: ubuntu-latest
+    env:
+      DEPLOYMENT_ENV: 'dev'
+      DEPLOY_CONFIG_PATH: '.deployment/vc-deploy-marketplace/argoDeploy.json'
+    steps:
+      - name: Invoke Module deployment workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: VC deployment
+          token: ${{ secrets.REPO_TOKEN }}
+          inputs: '{ "artifactUrl": "${{ needs.ci.outputs.artifactUrl }}", "deployEnvironment": "${{ env.DEPLOYMENT_ENV }}", "deployConfigPath": "${{ DEPLOY_CONFIG_PATH }}" }'
+
