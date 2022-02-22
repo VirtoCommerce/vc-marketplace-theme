@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "baseUrl": ".",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "lib": ["ESNext", "DOM"],
+    "paths": {
+      "@/*": ["client-app/*"],
+      "@core/*": ["client-app/core/*"]
+    }
+  },
+  "include": [
+    "client-app/**/*.ts",
+    "client-app/**/*.json",
+    "client-app/**/*.d.ts",
+    "client-app/**/*.tsx",
+    "client-app/**/*.vue",
+    "client-app/**/*.graphql"
+  ],
+  "exclude": ["node_modules", "**/*.js"]
+}

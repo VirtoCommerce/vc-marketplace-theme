@@ -1,15 +1,34 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en" class="h-100">
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0, user-scalable=0" />
+  <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+    <meta content="" name="description"/>
+    <meta content="" name="keywords"/>
+    <meta content="index, follow, noodp" name="robots"/>
+    <meta content="index, follow" name="googlebot"/>
+    <meta content="notranslate" name="google"/>
+    <meta content="telephone=no" name="format-detection"/>
+  <title>{{ store.title }}</title>
+  <base href="{{ '/' | absolute_url }}" />
+  <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
 
-    <title>{{ shop.name }}</title>
+  <!-- Google fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
 
-    {{ content_for_header }}
+  <link href="{{'favicon.ico' | static_asset_url }}" rel="icon" type="image/x-icon">
+  <script>
+    window.BASE_URL = `{{ "/" | full_url }}`;
+    window.STORE_NAME = "{{ current_store.name }}";
+    window.STORE_ID = "{{ current_store.id }}";
+    window.LOCALE = "{{ current_language.culture_name }}";
+    window.USER_ID = "{{ current_user.id }}";
+  </script>
 </head>
-<body>
+<body class="font-lato">
+    <!-- Content here -->
     {{ content_for_layout }}
 </body>
 </html>

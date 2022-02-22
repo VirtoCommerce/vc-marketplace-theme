@@ -1,0 +1,94 @@
+query SearchProducts(
+  $storeId: String!
+  $userId: String!
+  $currencyCode: String!
+  $cultureName: String
+  $filter: String
+  $after: String
+  $first: Int
+  $sort: String
+  $query: String
+  $fuzzy: Boolean
+  $fuzzyLevel: Int
+  $withFacets: Boolean!
+) {
+  products(
+    storeId: $storeId
+    userId: $userId
+    after: $after
+    first: $first
+    filter: $filter
+    sort: $sort
+    currencyCode: $currencyCode
+    cultureName: $cultureName
+    query: $query
+    fuzzy: $fuzzy
+    fuzzyLevel: $fuzzyLevel
+  ) {
+    totalCount
+    items {
+      name
+      id
+      code
+      minQuantity
+      maxQuantity
+      hasVariations
+      slug
+      outline
+      imgSrc
+      images {
+        url
+      }
+      description(type: "QuickReview") {
+        content
+        id
+      }
+      availabilityData {
+        isActive
+        isAvailable
+        isBuyable
+        isInStock
+        availableQuantity
+      }
+      price {
+        actual {
+          amount
+          formattedAmount
+        }
+        discountAmount {
+          amount
+          formattedAmount
+        }
+        sale {
+          amount
+          formattedAmount
+        }
+        list {
+          amount
+          formattedAmount
+        }
+      }
+    }
+    term_facets @include(if: $withFacets) {
+      name
+      label
+      terms {
+        label
+        term
+        count
+        isSelected
+      }
+    }
+    range_facets @include(if: $withFacets) {
+      name
+      label
+      ranges {
+        label
+        count
+        from
+        to
+        isSelected
+      }
+    }
+  }
+}

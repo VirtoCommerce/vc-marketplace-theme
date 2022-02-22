@@ -1,0 +1,118 @@
+#import "../../../fragments/cartAddressFields.graphql"
+#import "../../../fragments/lineItemFields.graphql"
+#import "../../../fragments/moneyFields.graphql"
+#import "../../../fragments/currencyFields.graphql"
+
+query getMyCart($storeId: String!, $userId: String!, $currencyCode: String!, $cultureName: String) {
+  cart(storeId: $storeId, userId: $userId, currencyCode: $currencyCode, cultureName: $cultureName) {
+    id
+    name
+    comment
+    purchaseOrderNumber
+    coupons {
+      code
+    }
+    itemsCount
+    itemsQuantity
+    shipments {
+      id
+      shipmentMethodCode
+      shipmentMethodOption
+      deliveryAddress {
+        ...cartAddressFields
+      }
+      price {
+        ...moneyFields
+      }
+    }
+    discounts {
+      promotionId
+      description
+      amount
+      coupon
+    }
+    payments {
+      id
+      paymentGatewayCode
+      billingAddress {
+        ...cartAddressFields
+      }
+    }
+
+    addresses {
+      ...cartAddressFields
+    }
+    items {
+      ...lineItemFields
+    }
+    currency {
+      ...currencyFields
+    }
+    total {
+      ...moneyFields
+    }
+    discountTotal {
+      ...moneyFields
+    }
+    subTotal {
+      ...moneyFields
+    }
+    shippingTotal {
+      ...moneyFields
+    }
+    shippingPrice {
+      ...moneyFields
+    }
+    taxTotal {
+      ...moneyFields
+    }
+    extendedPriceTotal {
+      ...moneyFields
+    }
+    extendedPriceTotalWithTax {
+      ...moneyFields
+    }
+    validationErrors(ruleSet: "items") {
+      errorCode
+      errorMessage
+      errorParameters {
+        key
+        value
+      }
+      objectId
+    }
+
+    availablePaymentMethods {
+      code
+      logoUrl
+      price {
+        ...moneyFields
+      }
+    }
+
+    availableShippingMethods {
+      id
+      code
+      logoUrl
+      optionName
+      optionDescription
+      price {
+        ...moneyFields
+      }
+    }
+
+    gifts {
+      id
+      imageUrl
+      name
+      lineItemId
+    }
+
+    availableGifts {
+      id
+      imageUrl
+      name
+      lineItemId
+    }
+  }
+}

@@ -1,0 +1,99 @@
+query GetProduct($storeId: String!, $currencyCode: String!, $cultureName: String, $id: String!) {
+  product(storeId: $storeId, id: $id, currencyCode: $currencyCode, cultureName: $cultureName) {
+    name
+    id
+    code
+    slug
+    outline
+    minQuantity
+    maxQuantity
+    imgSrc
+    images {
+      url
+    }
+    breadcrumbs {
+      itemId
+      typeName
+      title
+      seoPath
+    }
+    description {
+      content
+      id
+    }
+    descriptions {
+      content
+      id
+    }
+    properties {
+      name
+      value
+      type
+    }
+    variations {
+      id
+      name
+      images {
+        url
+      }
+      minQuantity
+      maxQuantity
+      code
+      properties {
+        name
+        value
+        type
+      }
+      availabilityData {
+        isActive
+        isAvailable
+        isBuyable
+        isInStock
+        availableQuantity
+      }
+      price {
+        actual {
+          amount
+          formattedAmount
+        }
+        discountAmount {
+          amount
+          formattedAmount
+        }
+        sale {
+          amount
+          formattedAmount
+        }
+        list {
+          amount
+          formattedAmount
+        }
+      }
+    }
+    availabilityData {
+      isActive
+      isAvailable
+      isBuyable
+      isInStock
+      availableQuantity
+    }
+    price {
+      actual {
+        amount
+        formattedAmount
+      }
+      discountAmount {
+        amount
+        formattedAmount
+      }
+      sale {
+        amount
+        formattedAmount
+      }
+      list {
+        amount
+        formattedAmount
+      }
+    }
+  }
+}

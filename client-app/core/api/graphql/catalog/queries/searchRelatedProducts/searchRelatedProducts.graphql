@@ -1,0 +1,28 @@
+query SearchRelatedProducts(
+  $storeId: String!
+  $currencyCode: String!
+  $cultureName: String
+  $id: String!
+  $after: String
+  $first: Int
+  $group: String
+  $query: String
+) {
+  product(storeId: $storeId, id: $id, currencyCode: $currencyCode, cultureName: $cultureName) {
+    associations(after: $after, first: $first, group: $group, query: $query) {
+      items {
+        product {
+          name
+          id
+          slug
+          imgSrc
+          price {
+            actual {
+              formattedAmount
+            }
+          }
+        }
+      }
+    }
+  }
+}
