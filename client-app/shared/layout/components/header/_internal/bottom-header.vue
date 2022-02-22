@@ -3,7 +3,7 @@
     <div class="px-12 py-7 flex items-center justify-between bg-white">
       <router-link to="/"><VcImage src="/static/images/common/logo.svg" class="h-12" /></router-link>
       <div class="w-0.5 h-6 bg-yellow-500 mx-5 hidden xl:block"></div>
-      <div class="italic text-lg text-gray-900 hidden xl:block">Construction goods</div>
+      <div class="italic text-lg text-gray-900 hidden xl:block">Marketplace</div>
       <div class="flex-grow"></div>
       <div class="flex items-center space-x-8">
         <BottomHeaderLink
