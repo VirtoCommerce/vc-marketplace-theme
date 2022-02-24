@@ -32,7 +32,7 @@ jobs:
       BLOB_SAS: ${{ secrets.BLOB_TOKEN }}
       VERSION_SUFFIX: ''
     outputs:
-      artifactUrl: ${{ steps.blobRelease.outputs.packageUrl }}
+      artifactUrl: '${{ steps.publish.outputs.blobUrl }}'
 
 
     steps:
