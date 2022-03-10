@@ -77,6 +77,13 @@ export type Breadcrumb = {
   typeName?: Maybe<Scalars['String']>;
 };
 
+export type BulkCartType = {
+  /** Cart */
+  cart?: Maybe<CartType>;
+  /** A set of errors in case the Skus are invalid */
+  errors?: Maybe<Array<Maybe<ValidationErrorType>>>;
+};
+
 export type CartAddressType = {
   /** Address type */
   addressType?: Maybe<Scalars['Int']>;
@@ -830,6 +837,18 @@ export type ImageType = {
   url?: Maybe<Scalars['String']>;
 };
 
+export type InputAddBulkItemsType = {
+  cartId?: InputMaybe<Scalars['String']>;
+  /** Bulk cart items */
+  cartItems: Array<InputMaybe<InputNewBulkItemType>>;
+  cartName?: InputMaybe<Scalars['String']>;
+  cartType?: InputMaybe<Scalars['String']>;
+  cultureName?: InputMaybe<Scalars['String']>;
+  currencyCode?: InputMaybe<Scalars['String']>;
+  storeId: Scalars['String'];
+  userId: Scalars['String'];
+};
+
 export type InputAddCouponType = {
   cartId?: InputMaybe<Scalars['String']>;
   cartName?: InputMaybe<Scalars['String']>;
@@ -1192,6 +1211,11 @@ export type InputDeleteContactType = {
   contactId: Scalars['String'];
 };
 
+export type InputDeleteMemberAddressType = {
+  addresses: Array<InputMaybe<InputMemberAddressType>>;
+  memberId: Scalars['String'];
+};
+
 export type InputDeleteUserType = {
   userNames: Array<InputMaybe<Scalars['String']>>;
 };
@@ -1280,6 +1304,13 @@ export type InputMoveWishlistItemType = {
   lineItemId: Scalars['String'];
   /** Source List ID */
   listId: Scalars['String'];
+};
+
+export type InputNewBulkItemType = {
+  /** Product SKU */
+  productSku: Scalars['String'];
+  /** Product quantity */
+  quantity?: InputMaybe<Scalars['Int']>;
 };
 
 export type InputNewCartItemType = {
@@ -1919,6 +1950,7 @@ export type MoneyType = {
 };
 
 export type Mutations = {
+  addBulkItemsCart?: Maybe<BulkCartType>;
   addCartAddress?: Maybe<CartType>;
   addCoupon?: Maybe<CartType>;
   addGiftItems?: Maybe<CartType>;
@@ -1943,6 +1975,7 @@ export type Mutations = {
   createUser?: Maybe<IdentityResultType>;
   createWishlist?: Maybe<WishlistType>;
   deleteContact?: Maybe<Scalars['Boolean']>;
+  deleteMemberAddresses?: Maybe<MemberType>;
   deleteUsers?: Maybe<IdentityResultType>;
   inviteUser?: Maybe<CustomIdentityResultType>;
   mergeCart?: Maybe<CartType>;
@@ -1976,6 +2009,11 @@ export type Mutations = {
   updateRole?: Maybe<IdentityResultType>;
   updateUser?: Maybe<IdentityResultType>;
   validateCoupon?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type MutationsAddBulkItemsCartArgs = {
+  command: InputAddBulkItemsType;
 };
 
 
@@ -2096,6 +2134,11 @@ export type MutationsCreateWishlistArgs = {
 
 export type MutationsDeleteContactArgs = {
   command: InputDeleteContactType;
+};
+
+
+export type MutationsDeleteMemberAddressesArgs = {
+  command: InputDeleteMemberAddressType;
 };
 
 
@@ -3616,6 +3659,13 @@ export type WishlistType = {
   storeId?: Maybe<Scalars['String']>;
 };
 
+export type DeleteMemberAddressesMutationVariables = Exact<{
+  command: InputDeleteMemberAddressType;
+}>;
+
+
+export type DeleteMemberAddressesMutation = { deleteMemberAddresses?: { id: string } };
+
 export type UpdateMemberAddressesMutationVariables = Exact<{
   command: InputUpdateMemberAddressType;
 }>;
@@ -3638,7 +3688,7 @@ export type GetDefaultShippingAddressQuery = { me?: { contact?: { defaultShippin
 export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMeQuery = { me?: { id: string, memberId?: string, userName: string, email?: string, emailConfirmed: boolean, photoUrl?: string, phoneNumber?: string, permissions?: Array<string> } };
+export type GetMeQuery = { me?: { id: string, memberId?: string, userName: string, email?: string, emailConfirmed: boolean, photoUrl?: string, phoneNumber?: string, permissions?: Array<string>, contact?: { firstName: string, lastName: string, fullName: string } } };
 
 export type GetMyAddressesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']>;
@@ -3807,6 +3857,28 @@ export type GetProductQueryVariables = Exact<{
 
 
 export type GetProductQuery = { product?: { name: string, id: string, code: string, slug?: string, outline?: string, minQuantity?: number, maxQuantity?: number, imgSrc?: string, images?: Array<{ url?: string }>, breadcrumbs?: Array<{ itemId: string, typeName?: string, title: string, seoPath?: string }>, description?: { content: string, id: string }, descriptions?: Array<{ content: string, id: string }>, properties?: Array<{ name: string, value?: any, type?: string }>, variations?: Array<{ id?: string, name?: string, minQuantity?: number, maxQuantity?: number, code?: string, images?: Array<{ url?: string }>, properties?: Array<{ name: string, value?: any, type?: string }>, availabilityData?: { isActive?: boolean, isAvailable?: boolean, isBuyable?: boolean, isInStock?: boolean, availableQuantity: any }, price?: { actual?: { amount: any, formattedAmount: string }, discountAmount?: { amount: any, formattedAmount: string }, sale?: { amount: any, formattedAmount: string }, list?: { amount: any, formattedAmount: string } } }>, availabilityData?: { isActive?: boolean, isAvailable?: boolean, isBuyable?: boolean, isInStock?: boolean, availableQuantity: any }, price?: { actual?: { amount: any, formattedAmount: string }, discountAmount?: { amount: any, formattedAmount: string }, sale?: { amount: any, formattedAmount: string }, list?: { amount: any, formattedAmount: string } } } };
+
+export type GetSearchResultsQueryVariables = Exact<{
+  storeId: Scalars['String'];
+  userId: Scalars['String'];
+  currencyCode: Scalars['String'];
+  cultureName?: InputMaybe<Scalars['String']>;
+  query?: InputMaybe<Scalars['String']>;
+  filter?: InputMaybe<Scalars['String']>;
+  productsAfter?: InputMaybe<Scalars['String']>;
+  productsFirst?: InputMaybe<Scalars['Int']>;
+  productsSort?: InputMaybe<Scalars['String']>;
+  productsFuzzy?: InputMaybe<Scalars['Boolean']>;
+  productsFuzzyLevel?: InputMaybe<Scalars['Int']>;
+  categoriesAfter?: InputMaybe<Scalars['String']>;
+  categoriesFirst?: InputMaybe<Scalars['Int']>;
+  categoriesSort?: InputMaybe<Scalars['String']>;
+  categoriesFuzzy?: InputMaybe<Scalars['Boolean']>;
+  categoriesFuzzyLevel?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type GetSearchResultsQuery = { products?: { totalCount?: number, items?: Array<{ id: string, name: string, code: string, slug?: string, imgSrc?: string, price?: { actual?: { amount: any, formattedAmount: string } } }> }, categories?: { totalCount?: number, items?: Array<{ id: string, name: string, seoInfo?: { semanticUrl?: string } }> } };
 
 export type CategoriesQueryVariables = Exact<{
   storeId: Scalars['String'];

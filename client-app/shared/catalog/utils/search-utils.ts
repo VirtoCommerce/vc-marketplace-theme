@@ -4,7 +4,7 @@ import {
   ProductsSearchParams,
   ProductsFilter,
   ProductsFilterValue,
-  SearchQueryParamNames,
+  ToRouteQueryOptions,
 } from "@/shared/catalog";
 import { FacetRangeType, FacetTermType, RangeFacet, TermFacet } from "@core/api/graphql/types";
 import { defaultPageSize } from "@core/constants";
@@ -36,13 +36,20 @@ function toFilterUrlParamValue(filterExpression: string): string {
 }
 
 export function fromRouteQuery(query: LocationQuery, options: FromRouteQueryOptions): ProductsSearchParams {
-  const { sortList, itemsPerPageList, defaultSortBy = "", defaultItemsPerPage = defaultPageSize } = options;
   const {
-    [SearchQueryParamNames.Page]: pageFromQuery,
-    [SearchQueryParamNames.Sort]: sortFromQuery,
-    [SearchQueryParamNames.Filter]: filterFromQuery,
-    [SearchQueryParamNames.Keyword]: keywordFromQuery,
-    [SearchQueryParamNames.ItemsPerPage]: sizeFromQuery,
+    sortList,
+    itemsPerPageList,
+    defaultSortBy = "",
+    defaultItemsPerPage = defaultPageSize,
+    urlParamKeys: { keywordKey, filterKey, sortKey, pageKey, itemsPerPageKey },
+  } = options;
+
+  const {
+    [pageKey]: pageFromQuery,
+    [sortKey]: sortFromQuery,
+    [filterKey]: filterFromQuery,
+    [keywordKey]: keywordFromQuery,
+    [itemsPerPageKey]: sizeFromQuery,
   } = query;
 
   const page = Number(pageFromQuery);
@@ -58,15 +65,19 @@ export function fromRouteQuery(query: LocationQuery, options: FromRouteQueryOpti
   };
 }
 
-export function toRouteQuery(params: ProductsSearchParams): LocationQuery {
+export function toRouteQuery(params: ProductsSearchParams, options: ToRouteQueryOptions): LocationQuery {
+  const {
+    urlParamKeys: { keywordKey, filterKey, sortKey, pageKey, itemsPerPageKey },
+  } = options;
+
   const { sort, keyword, itemsPerPage, page, filter } = params;
 
   return {
-    [SearchQueryParamNames.Filter]: filter ? toFilterUrlParamValue(filter) : undefined,
-    [SearchQueryParamNames.Sort]: sort || undefined,
-    [SearchQueryParamNames.Keyword]: keyword || undefined,
-    [SearchQueryParamNames.Page]: page?.toString(),
-    [SearchQueryParamNames.ItemsPerPage]: itemsPerPage?.toString(),
+    [filterKey]: filter ? toFilterUrlParamValue(filter) : undefined,
+    [sortKey]: sort || undefined,
+    [keywordKey]: keyword || undefined,
+    [pageKey]: page?.toString(),
+    [itemsPerPageKey]: itemsPerPage?.toString(),
   } as LocationQuery;
 }
 

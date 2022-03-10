@@ -14,6 +14,7 @@ export default async function searchProducts(
     keyword,
     fuzzy,
     fuzzyLevel,
+    productIds,
   }: Partial<ProductsSearchParams>,
   options: {
     // @default false
@@ -21,7 +22,7 @@ export default async function searchProducts(
   } = {}
 ): Promise<ProductConnection> {
   const { withFacets = false } = options;
-  const filterString = [categoryId ? `category.subtree:${catalogId}/${categoryId}` : "", filter]
+  const filterString = [`category.subtree:${catalogId}${categoryId ? "/" + categoryId : ""}`, filter]
     .filter(Boolean)
     .join(" ");
 
@@ -40,6 +41,7 @@ export default async function searchProducts(
       cultureName: locale,
       first: itemsPerPage,
       after: String((page - 1) * itemsPerPage),
+      productIds,
     },
   });
   return data.products;
