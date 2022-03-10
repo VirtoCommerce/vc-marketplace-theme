@@ -95,7 +95,7 @@ async function onSignIn() {
 <style scoped>
 .banner {
   position: relative;
-  background: url(/static/images/home/main-banner.webp) center center no-repeat;
+  background: url(/static/images/home/pivo.jpg) center center no-repeat;
   background-size: cover;
   min-height: 549px;
 }

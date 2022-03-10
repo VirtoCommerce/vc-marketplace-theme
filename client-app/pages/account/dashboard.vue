@@ -8,7 +8,7 @@
           <AccountNavigation></AccountNavigation>
         </div>
         <!-- Second column-->
-        <div class="flex flex-col w-full px-5 space-y-5 lg:w-3/5">
+        <div class="flex flex-col w-full px-5 space-y-5 lg:w-4/5">
           <VcCard title="Last orders" :full-width-content="true">
             <template #header-button>
               <div v-if="isMobile">
@@ -186,34 +186,8 @@
               </template>
             </VcTable>
           </VcCard>
-          <div class="flex flex-col space-y-5 lg:flex-row lg:space-x-5 lg:space-y-0">
-            <VcCard title="Monthly spend report" class="lg:w-1/2">
-              <div class="flex content-center space-x-9 lg:space-x-4">
-                <VcImage src="/static/images/dashboard/spend-chart.svg" class="h-24 w-24" alt="Spend chart" />
-                <div
-                  class="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:flex-wrap sm:space-x-5 sm:items-center xl:space-x-7 justify-center"
-                >
-                  <div class="flex flex-col lg:items-center lg:space-y-3">
-                    <span class="text-xs text-gray-400 lg:text-gray-600 lg:font-bold">Budget</span>
-                    <span class="text-xl font-extrabold">$58,152</span>
-                  </div>
-                  <div class="flex flex-col lg:items-center lg:space-y-3">
-                    <span class="text-xs text-gray-400 lg:text-gray-600 lg:font-bold">Total spend</span>
-                    <span class="text-xl font-extrabold">$530,152</span>
-                  </div>
-                </div>
-              </div>
-            </VcCard>
-            <VcCard title="Orders status" class="h-52 lg:h-auto lg:w-1/2"></VcCard>
-          </div>
           <!-- Commented due to accetpance criteria, will be used in future-->
           <!-- <VcCard title="Users" class="h-52"></VcCard> -->
-        </div>
-        <!-- Third column-->
-        <div class="hidden lg:flex flex-col lg:w-1/5 space-y-5">
-          <VcCard title="Bulk order pad" class="h-96"></VcCard>
-          <!-- Commented due to accetpance criteria, will be used in future-->
-          <!-- <VcCard title="Current user roles" class="h-80"></VcCard> -->
         </div>
       </div>
     </div>
@@ -221,7 +195,7 @@
 </template>
 
 <script setup lang="ts">
-import { ITableColumn, VcCard, VcImage, VcTable, TableStatusBadge, VcButton } from "@/components";
+import { ITableColumn, VcCard, VcTable, TableStatusBadge, VcButton } from "@/components";
 import { CustomerOrderType } from "@/core/api/graphql/types";
 import { sortDescending } from "@/core/constants";
 import { AccountNavigation } from "@/shared/account";

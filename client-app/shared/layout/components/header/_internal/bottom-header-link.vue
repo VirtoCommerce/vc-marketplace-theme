@@ -70,7 +70,7 @@ onClickOutside(submenu, () => {
 .menu-link.router-link-active:after {
   content: "";
   height: 3px;
-  background-color: #ffbe2e;
+  background-color: #205527;
   position: absolute;
   width: 100%;
   margin-top: 5px;

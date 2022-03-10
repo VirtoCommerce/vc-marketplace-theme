@@ -12,10 +12,20 @@ module.exports = {
       colors: {
         // Generated with https://www.tailwindshades.com/
         yellow: {
-          500: "#F0AD4E",
+          DEFAULT: '#205527',
+          '50': '#67C673',
+          '100': '#58C066',
+          '200': '#41AE50',
+          '300': '#369042',
+          '400': '#2B7335',
+          '500': '#205527',
+          '600': '#112C14',
+          '700': '#010302',
+          '800': '#000000',
+          '900': '#000000',
         },
         red: {
-          500: "#FF4A4A",
+          500: "#FF2B00",
         },
         cyan: {
           500: "#5294AD",
@@ -23,7 +33,7 @@ module.exports = {
         },
 
         primary: {
-          DEFAULT: "var(--color-primary, #f0ad4e)",
+          DEFAULT: "var(--color-primary, #205527)",
         },
         secondary: {
           DEFAULT: "var(--color-secondary, #151b1e)",
@@ -34,7 +44,7 @@ module.exports = {
 
         info: "#292D3B",
         success: "#479048",
-        warning: "#F0AD4E",
+        warning: "#205527",
         danger: "#EC6A5E",
       },
     },

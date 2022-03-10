@@ -13,15 +13,6 @@
 
     <div class="flex flex-col flex-grow pt-4">
       <div class="flex items-center justify-between mb-3">
-        <!-- Compare checkbox -->
-        <label class="flex-grow hidden md:inline-flex items-center text-sm cursor-pointer">
-          <input
-            type="checkbox"
-            class="form-tick appearance-none w-5 h-5 border-2 border-gray-300 rounded-sm checked:bg-cyan-700 checked:border-transparent focus:outline-none cursor-pointer"
-          />
-          <span class="ml-2">Compare</span>
-        </label>
-
         <div v-if="product.availabilityData?.isInStock" class="flex items-center text-green-700 text-xs">
           <div class="w-1.5 h-1.5 bg-green-700 rounded mr-1"></div>
           {{ product.availabilityData.availableQuantity > 9999 ? "9999+" : product.availabilityData.availableQuantity }}

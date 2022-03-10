@@ -422,8 +422,8 @@ onMounted(async () => {
   width: 0;
   height: 0;
   border: 1.5em solid transparent;
-  border-top-color: #f0ad4e;
-  border-right-color: #f0ad4e;
+  border-top-color: #205527;
+  border-right-color: #205527;
 }
 
 .polygons-bg {

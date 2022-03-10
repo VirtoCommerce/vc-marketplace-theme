@@ -27,12 +27,15 @@ const props = defineProps({
 // todo: move this logic to the separated helper. For variations properties also
 const grouped = computed(() => {
   return _(props.properties)
-    .filter((p) => !!p && p.type === "Product")
+    .filter((p) => !!p && p.type === "Product" && p.value !== undefined && p.value !== null && !p.hidden)
     .groupBy((p) => p.name)
     .map((props, propName) => {
       return {
-        name: propName,
-        values: props.map((x) => x.value).join(", "),
+        name: props[0].label || propName,
+        values:
+          props[0].valueType === "Boolean"
+            ? props.map((x) => (x.value ? "Yes" : "No")).join(", ")
+            : props.map((x) => x.value).join(", "),
       };
     })
     .value();

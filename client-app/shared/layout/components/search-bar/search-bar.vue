@@ -4,7 +4,7 @@
     v-click-outside="() => searchDropdownVisible && hideSearchDropdown()"
   >
     <router-link to="/">
-      <VcImage src="/static/images/common/logo-white.svg" class="h-12 mr-8" lazy />
+      <VcImage src="/static/images/common/logo.png" class="h-12 mr-8" lazy />
     </router-link>
 
     <div class="flex flex-grow relative">

@@ -2,7 +2,7 @@
   <div class="fixed bg-gray-800 opacity-95 z-50 w-full h-screen flex flex-col">
     <div class="px-6 flex justify-between items-center h-14 flex-shrink-0">
       <router-link to="/" @click="$emit('close')">
-        <VcImage src="/static/images/common/logo-white.svg" class="h-9" />
+        <VcImage src="/static/images/common/logo.png" class="h-9" />
       </router-link>
       <i class="fas fa-times text-2xl text-yellow-500" @click="$emit('close')"></i>
     </div>

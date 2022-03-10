@@ -2,7 +2,7 @@
   <div class="relative">
     <div class="px-12 py-7 flex items-center justify-between bg-white">
       <router-link to="/">
-        <VcImage src="/static/images/common/logo.svg" class="h-12" />
+        <VcImage src="/static/images/common/logo.png" class="h-12" />
       </router-link>
 
       <div class="w-0.5 h-6 bg-yellow-500 mx-5 hidden xl:block"></div>
