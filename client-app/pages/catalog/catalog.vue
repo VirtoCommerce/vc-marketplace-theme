@@ -48,21 +48,6 @@
               </div>
             </VcCard>
 
-            <!-- Previously purchased -->
-            <VcCard title="Previously purchased">
-              <VcCheckbox color="cyan-700">View previously purchased products</VcCheckbox>
-            </VcCard>
-
-            <!-- Branch availability -->
-            <VcCard title="Branch availability">
-              <p class="text-sm font-medium">
-                <span class="text-cyan-700 font-semibold cursor-pointer hover:text-cyan-900">
-                  Select a pickup branch
-                </span>
-                to see products in stock now.
-              </p>
-            </VcCard>
-
             <!-- Facet Filters Skeletons -->
             <template v-if="loading && !filters.length">
               <VcCardSkeleton is-collapsible v-for="i in 6" :key="i">
@@ -89,7 +74,7 @@
                   :value="item.value"
                   :disabled="loading"
                   class="mt-3 first:mt-0"
-                  color="cyan-700"
+                  color="yellow-500"
                   @change="applyFilters"
                 >
                   <div class="flex">
