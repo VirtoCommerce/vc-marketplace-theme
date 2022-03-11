@@ -5,8 +5,6 @@
       <TopHeaderLink to="/account/dashboard">Dashboard</TopHeaderLink>
       <div class="mx-3 h-1 w-1 bg-yellow-500 rounded"></div>
       <TopHeaderLink to="/account/orders">Order History</TopHeaderLink>
-      <div class="mx-3 h-1 w-1 bg-yellow-500 rounded"></div>
-      <TopHeaderLink to="/500">Lists</TopHeaderLink>
       <div class="w-px h-5 bg-yellow-500 mx-4 hidden lg:block"></div>
 
       <!-- Account menu -->

@@ -152,19 +152,6 @@
                     </td>
                     <td class="p-5 overflow-hidden overflow-ellipsis">{{ address.phone }}</td>
                     <td class="p-5 overflow-hidden overflow-ellipsis">{{ address.email }}</td>
-                    <td
-                      v-if="defaultShippingAddress && address.id === defaultShippingAddress.id"
-                      class="px-3 py-5 font-bold"
-                    >
-                      <i class="fas fa-check text-yellow-500"></i> Default
-                    </td>
-                    <td v-else class="p-5 text-blue-400 font-semibold">
-                      <span
-                        class="border-b border-dashed border-blue-400 cursor-pointer"
-                        @click="setDefaultAddress(address)"
-                        >Make default</span
-                      >
-                    </td>
                     <td class="p-5 text-center">
                       <div class="inline-block space-x-2">
                         <!-- todo: use VcButton -->
@@ -195,7 +182,6 @@
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td></td>
                   </tr>
                   <tr>
                     <td colspan="6" class="polygons-bg">
@@ -215,9 +201,6 @@
                       <div class="h-6 bg-gray-200 animate-pulse"></div>
                     </td>
                     <td class="w-4/12 p-5">
-                      <div class="h-6 bg-gray-200 animate-pulse"></div>
-                    </td>
-                    <td class="p-5">
                       <div class="h-6 bg-gray-200 animate-pulse"></div>
                     </td>
                     <td class="p-5">
@@ -306,10 +289,6 @@ const columns = ref<ITableColumn[]>([
     id: "email",
     title: "Email",
     sortable: true,
-  },
-  {
-    id: "default",
-    title: "Default",
   },
   {
     id: "actions",
