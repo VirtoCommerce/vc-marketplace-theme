@@ -36,8 +36,8 @@
 </template>
 
 <script setup lang="ts">
+import { MenuLinkType } from "@/core/api/graphql/types";
 import { PropType, ref } from "vue";
-import { IMenuItem } from "../../../";
 
 defineProps({
   title: {
@@ -51,7 +51,7 @@ defineProps({
   },
 
   children: {
-    type: Array as PropType<IMenuItem[]>,
+    type: Array as PropType<MenuLinkType[]>,
     default: null,
   },
 });
