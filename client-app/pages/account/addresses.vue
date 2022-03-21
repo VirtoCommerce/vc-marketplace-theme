@@ -68,20 +68,7 @@
                 @headerClick="applySorting"
               >
                 <template #mobile-item="itemData">
-                  <div
-                    class="grid grid-cols-2 p-6 gap-y-4 border-b border-gray-200"
-                    :class="{
-                      'relative mobile-default-badge':
-                        defaultShippingAddress && itemData.item.id === defaultShippingAddress.id,
-                    }"
-                  >
-                    <div
-                      v-if="defaultShippingAddress && itemData.item.id === defaultShippingAddress.id"
-                      class="absolute top-0 right-0 z-10"
-                    >
-                      <i class="fas fa-check text-white mr-2"></i>
-                    </div>
-
+                  <div class="grid grid-cols-2 p-6 gap-y-4 border-b border-gray-200">
                     <div class="flex flex-col">
                       <span class="text-sm text-gray-400"> Recipient's name </span>
                       <span class="pr-4 font-extrabold overflow-hidden overflow-ellipsis">
@@ -157,7 +144,7 @@
                         <!-- todo: use VcButton -->
                         <button
                           type="button"
-                          class="h-7 w-7 shadow rounded text-yellow-500 hover:bg-gray-100"
+                          class="h-7 w-7 shadow rounded text-[color:var(--color-primary)] hover:bg-gray-100"
                           @click="openEditMode(address)"
                         >
                           <i class="fas fa-pencil-alt"></i>
@@ -165,7 +152,7 @@
 
                         <button
                           type="button"
-                          class="h-7 w-7 shadow rounded text-red-500 hover:bg-gray-100"
+                          class="h-7 w-7 shadow rounded text-[color:var(--color-danger)] hover:bg-gray-100"
                           @click="removeAddress(address)"
                         >
                           <i class="fas fa-times"></i>
@@ -326,7 +313,7 @@ function actionBuilder(address: MemberAddressType) {
       icon: "fas fa-trash-alt",
       title: "Delete",
       leftActions: true,
-      bgColor: "bg-red-500",
+      bgColor: "bg-[color:var(--color-danger)]",
       clickHandler() {
         removeAddress(address);
       },
@@ -337,7 +324,7 @@ function actionBuilder(address: MemberAddressType) {
     result.push({
       icon: "fas fa-check",
       title: "Make default",
-      bgColor: "bg-yellow-500",
+      bgColor: "bg-[color:var(--color-primary)]",
       clickHandler() {
         setDefaultAddress(address);
       },
@@ -370,10 +357,6 @@ async function removeAddress(address: MemberAddressType): Promise<void> {
   if (!window.confirm("Are you sure you want do delete this address?")) return;
 
   await removeAddresses([address]);
-
-  if (addresses.value.length > 0 && defaultShippingAddress.value && address.id === defaultShippingAddress.value.id) {
-    //todo: set the first item in updatedAddresses to default one
-  }
 }
 
 onMounted(async () => {
@@ -386,25 +369,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.mobile-default-badge::before {
-  /* we need this to create the pseudo-element */
-  content: "";
-  display: block;
-
-  /* position the triangle in the top right corner */
-  position: absolute;
-  z-index: 0;
-  top: 0;
-  right: 0;
-
-  /* create the triangle */
-  width: 0;
-  height: 0;
-  border: 1.5em solid transparent;
-  border-top-color: #205527;
-  border-right-color: #205527;
-}
-
 .polygons-bg {
   background-image: url(/static/images/account/addresses-bg.svg);
   background-repeat: no-repeat;

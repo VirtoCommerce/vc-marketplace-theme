@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-100 pt-7 pb-16 shadow-inner">
+  <div class="bg-gray-100 pt-7 pb-16 shadow-inner grow">
     <div class="max-w-screen-2xl px-5 md:px-12 mx-auto">
       <!-- Breadcrumbs -->
       <Breadcrumbs class="mb-2 md:mb-8" :items="breadcrumbsItems"></Breadcrumbs>
@@ -74,7 +74,7 @@
                   :value="item.value"
                   :disabled="loading"
                   class="mt-3 first:mt-0"
-                  color="yellow-500"
+                  color="[color:var(--color-primary)]"
                   @change="applyFilters"
                 >
                   <div class="flex">
@@ -91,13 +91,11 @@
         <div class="lg:w-3/4 xl:w-4/5 flex-grow">
           <div class="flex flex-col">
             <h2 class="text-gray-800 text-2xl lg:text-3xl font-bold uppercase">{{ selectedCategory?.label }}</h2>
+
             <p class="py-3">
               <span class="font-extrabold">{{ total }} results found.</span>
-              <span>&nbsp;</span>
-              <span class="font-normal">
-                {{ products.length }} displayed that include {{ products.length }} products.
-              </span>
             </p>
+
             <div class="flex justify-start mb-6 mt-4">
               <!-- Mobile filters toggler -->
               <div class="lg:hidden mr-3">
@@ -107,18 +105,16 @@
               </div>
 
               <!-- View options -->
-              <ViewMode v-model:mode="viewMode" class="hidden md:inline-flex mr-6"></ViewMode>
-
-              <!-- Page size -->
-              <PageSize v-model:size="itemsPerPage" class="hidden md:flex" />
+              <ViewMode v-model:mode="viewModeQueryParam" class="hidden md:inline-flex mr-6" />
 
               <!-- Sorting -->
               <div class="flex items-center flex-grow md:flex-grow-0 ml-auto">
                 <span class="hidden lg:block shrink-0 mr-2">Sort by:</span>
 
                 <VcSelect
-                  v-model="sort"
+                  v-model="sortQueryParam"
                   text-field="name"
+                  value-field="id"
                   :is-disabled="loading"
                   :items="productSortingList"
                   class="w-full md:w-52 lg:w-64"
@@ -130,11 +126,11 @@
           <!-- Products -->
           <DisplayProducts
             :loading="loading"
-            :view-mode="viewMode"
+            :view-mode="viewModeQueryParam"
             :items-per-page="itemsPerPage"
             :products="products"
             :class="
-              viewMode === 'list'
+              viewModeQueryParam === 'list'
                 ? 'space-y-5'
                 : 'grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6 xl:gap-x-6 xl:gap-y-8'
             "
@@ -143,28 +139,24 @@
               <VcButton
                 v-if="item.hasVariations"
                 :to="{ name: 'Product', params: { productId: item.id } }"
-                :class="{ 'w-full': viewMode === 'list' }"
+                :class="{ 'w-full': viewModeQueryParam === 'list' }"
                 class="uppercase mb-4"
               >
                 Choose
               </VcButton>
 
-              <AddToCart v-else :product="item"></AddToCart>
+              <AddToCart v-else :product="item" />
             </template>
           </DisplayProducts>
 
-          <!-- VcPagination and options bottom block -->
-          <div class="flex justify-center md:justify-between pt-11">
-            <VcPagination v-model:page="page" :pages="pages" />
-
-            <div class="flex">
-              <!-- View options -->
-              <ViewMode v-model:mode="viewMode" class="hidden md:inline-flex mr-6"></ViewMode>
-
-              <!-- Page size -->
-              <PageSize v-model:size="itemsPerPage" class="hidden md:flex" />
-            </div>
-          </div>
+          <VcInfinityScrollLoader
+            v-if="!loading"
+            :loading="loadingMore"
+            distance="400"
+            class="mt-9 -mb-6"
+            @visible="loadMoreProducts"
+          />
+          <VcScrollTopButton></VcScrollTopButton>
         </div>
       </div>
     </div>
@@ -172,24 +164,43 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, shallowRef, watch, onMounted, watchEffect, PropType } from "vue";
-import { breakpointsTailwind, debouncedWatch, useBreakpoints, whenever } from "@vueuse/core";
+import {
+  computed,
+  ref,
+  shallowRef,
+  watch,
+  onMounted,
+  watchEffect,
+  PropType,
+  onBeforeUnmount,
+  WatchStopHandle,
+} from "vue";
+import { breakpointsTailwind, useBreakpoints, whenever } from "@vueuse/core";
 import {
   Breadcrumbs,
   IBreadcrumbsItem,
-  PageSize,
   DisplayProducts,
   toFilterExpression,
   useCategories,
   useProducts,
-  useProductsSearchParams,
   ViewMode,
+  ProductsSearchParams,
 } from "@/shared/catalog";
-import { VcButton, VcCard, VcCardSkeleton, VcCheckbox, VcPagination, VcSelect } from "@/components";
+import {
+  VcButton,
+  VcCard,
+  VcCardSkeleton,
+  VcCheckbox,
+  VcInfinityScrollLoader,
+  VcSelect,
+  VcScrollTopButton,
+} from "@/components";
 import { AddToCart } from "@/shared/cart";
 import { useRouteQueryParam } from "@core/composables";
-import { defaultMobilePageSize, defaultPageSize, pageSizes, productSortingList } from "@core/constants";
+import { defaultPageSize, productSortingList } from "@core/constants";
 import QueryParamName from "@core/query-param-name.enum";
+
+const watchStopHandles: WatchStopHandle[] = [];
 
 const props = defineProps({
   categorySeoUrls: {
@@ -200,13 +211,8 @@ const props = defineProps({
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const { selectedCategory, selectCategoryBySeoUrl, loadCategoriesTree } = useCategories();
-const { fetchProducts, loading, products, total, pages, filters } = useProducts({ withFilters: true });
-const { searchParams, updateSearchParams } = useProductsSearchParams({
-  defaultSortBy: productSortingList[0].id,
-  sortList: productSortingList.map((item) => item.id),
-  defaultItemsPerPage: defaultPageSize,
-  itemsPerPageList: [...pageSizes, /* for mobile */ defaultMobilePageSize],
-  urlParamKeys: { keywordKey: QueryParamName.Keyword },
+const { fetchProducts, fetchMoreProducts, loading, loadingMore, products, total, pages, filters } = useProducts({
+  withFilters: true,
 });
 
 const isMobile = breakpoints.smaller("md");
@@ -214,10 +220,25 @@ const isMobileSidebar = breakpoints.smaller("lg");
 const mobileSidebarVisible = ref(false);
 const sidebarElement = shallowRef<HTMLElement | null>(null);
 const keyword = ref("");
+const page = ref(1);
+const itemsPerPage = ref(defaultPageSize);
 
-const viewMode = useRouteQueryParam<"grid" | "list">("viewMode", {
+const viewModeQueryParam = useRouteQueryParam<"grid" | "list">("viewMode", {
   defaultValue: "grid",
   validator: (value) => (isMobile.value ? false : ["grid", "list"].includes(value)),
+});
+
+const sortQueryParam = useRouteQueryParam<string>(QueryParamName.Sort, {
+  defaultValue: productSortingList[0].id,
+  validator: (value) => productSortingList.some((item) => item.id === value),
+});
+
+const keywordQueryParam = useRouteQueryParam<string>(QueryParamName.Keyword, {
+  defaultValue: "",
+});
+
+const filterQueryParam = useRouteQueryParam<string>(QueryParamName.Filter, {
+  defaultValue: "",
 });
 
 const categorySeoUrl = computed<string>(() =>
@@ -226,36 +247,15 @@ const categorySeoUrl = computed<string>(() =>
     : props.categorySeoUrls?.[props.categorySeoUrls?.length - 1] ?? ""
 );
 
-const page = computed<number>({
-  get: () => searchParams.value.page,
-  set(value) {
-    updateSearchParams({
-      page: value,
-    });
-  },
-});
+const searchParams = computed<ProductsSearchParams>(() => ({
+  categoryId: selectedCategory.value?.id,
+  itemsPerPage: itemsPerPage.value,
+  sort: sortQueryParam.value,
+  keyword: keywordQueryParam.value,
+  filter: filterQueryParam.value,
+}));
 
-const itemsPerPage = computed<number>({
-  get: () => searchParams.value.itemsPerPage,
-  set(value) {
-    updateSearchParams({
-      itemsPerPage: value,
-      page: 1,
-    });
-  },
-});
-
-const sort = computed<typeof productSortingList[0]>({
-  get: () => productSortingList.find((item) => item.id === searchParams.value.sort)!,
-  set(value) {
-    updateSearchParams({
-      sort: value.id,
-      page: 1,
-    });
-  },
-});
-
-const isAppliedKeyword = computed<boolean>(() => keyword.value === searchParams.value.keyword);
+const isAppliedKeyword = computed<boolean>(() => keyword.value === keywordQueryParam.value);
 
 const breadcrumbsItems = computed<IBreadcrumbsItem[]>(() => {
   const items: IBreadcrumbsItem[] = [{ url: "/", title: "Home" }];
@@ -280,73 +280,67 @@ function hideMobileSidebar() {
 function onSearchStart() {
   const searchText = keyword.value;
 
-  if (searchText !== searchParams.value.keyword && searchText.length <= 30) {
+  if (searchText !== keywordQueryParam.value && searchText.length <= 30) {
     hideMobileSidebar();
-    updateSearchParams({
-      keyword: searchText,
-      page: 1,
-    });
+    keywordQueryParam.value = searchText;
   }
 }
 
 function applyFilters() {
   hideMobileSidebar();
-  updateSearchParams({
-    filter: toFilterExpression(filters),
-    page: 1,
-  });
+  filterQueryParam.value = toFilterExpression(filters);
 }
 
 async function loadProducts() {
-  await fetchProducts({
+  page.value = 1;
+  await fetchProducts(searchParams.value);
+}
+
+async function loadMoreProducts() {
+  if (page.value === pages.value) {
+    return;
+  }
+
+  const nextPage = page.value + 1;
+
+  page.value = nextPage;
+
+  await fetchMoreProducts({
     ...searchParams.value,
-    categoryId: selectedCategory.value?.id,
+    page: nextPage,
   });
 }
 
 onMounted(async () => {
   await loadCategoriesTree(""); // TODO: use active category key instead of id
   selectCategoryBySeoUrl(categorySeoUrl.value);
+  await loadProducts();
 
-  // Check the number of items on the page
-  if (isMobile.value && itemsPerPage.value !== defaultMobilePageSize) {
-    await updateSearchParams(
+  // Start change tracking after initial data load
+  watchStopHandles.push(
+    /**
+     * You must force the watch to stop before unmounting the component
+     * because the computed value being watched includes the global reactive object.
+     * In this case, it is the "current route" inside the "useRouteQueryParam" function.
+     *
+     * Related links:
+     * https://github.com/vuejs/core/issues/2291
+     */
+    watch(
+      computed(() => JSON.stringify(searchParams.value)),
+      loadProducts,
       {
-        itemsPerPage: defaultMobilePageSize,
-        page: 1,
-      },
-      "replace"
-    );
-  } else if (!isMobile.value && !pageSizes.includes(itemsPerPage.value)) {
-    await updateSearchParams(
-      {
-        itemsPerPage: defaultPageSize,
-        page: 1,
-      },
-      "replace"
-    );
-  } else {
-    await loadProducts();
-  }
-
-  // Handle window resize to fix parameters on mobile view
-  watch(isMobile, (mobileView) => {
-    updateSearchParams(
-      {
-        itemsPerPage: mobileView ? defaultMobilePageSize : defaultPageSize,
-        page: 1,
-      },
-      "replace"
-    );
-  });
+        flush: "post",
+      }
+    )
+  );
 });
 
-watchEffect(() => (keyword.value = searchParams.value.keyword ?? ""));
+onBeforeUnmount(() => {
+  watchStopHandles.forEach((watchStopHandle) => watchStopHandle());
+});
+
+watchEffect(() => (keyword.value = keywordQueryParam.value ?? ""));
 whenever(() => !isMobileSidebar.value, hideMobileSidebar);
 watch(categorySeoUrl, selectCategoryBySeoUrl);
-
-debouncedWatch(() => `${categorySeoUrl.value} ${JSON.stringify(searchParams.value)}`, loadProducts, {
-  flush: "post",
-  debounce: 200,
-});
 </script>

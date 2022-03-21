@@ -2,6 +2,15 @@
   <div class="flex flex-grow flex-col lg:flex-row p-6 lg:space-x-12 bg-white">
     <div class="lg:w-1/3 mb-8 lg:mb-0">
       <VcImageGallery :src="product.imgSrc ?? ''" :images="product.images ?? []" :is-mobile="isMobile" />
+
+      <!-- Compare checkbox -->
+      <div v-if="$cfg.product_compare_enabled" class="mt-8 hidden md:flex items-center text-sm cursor-pointer">
+        <input
+          type="checkbox"
+          class="form-tick appearance-none w-5 h-5 border-2 border-gray-300 rounded-sm checked:bg-[color:var(--color-link)] checked:border-transparent focus:outline-none cursor-pointer"
+        />
+        <span class="ml-2">Compare</span>
+      </div>
     </div>
 
     <div class="flex flex-col lg:w-2/3">
