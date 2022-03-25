@@ -29,13 +29,13 @@ const grouped = computed(() => {
   return _(props.properties)
     .filter((p) => !!p && p.type === "Product" && p.value !== undefined && p.value !== null && !p.hidden)
     .groupBy((p) => p.name)
-    .map((props, propName) => {
+    .map((properties, propName) => {
       return {
-        name: props[0].label || propName,
+        name: properties[0].label || propName,
         values:
-          props[0].valueType === "Boolean"
-            ? props.map((x) => (x.value ? "Yes" : "No")).join(", ")
-            : props.map((x) => x.value).join(", "),
+          properties[0].valueType === "Boolean"
+            ? properties.map((x) => (x.value ? "Yes" : "No")).join(", ")
+            : properties.map((x) => x.value).join(", "),
       };
     })
     .value();

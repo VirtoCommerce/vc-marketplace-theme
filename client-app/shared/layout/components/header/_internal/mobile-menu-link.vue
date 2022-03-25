@@ -25,7 +25,7 @@
   </div>
   <!-- Regular link -->
   <router-link
-    v-else
+    v-else-if="to"
     :to="to"
     class="uppercase text-xl font-extrabold text-white"
     :class="$attrs.class"
@@ -42,7 +42,7 @@ import { PropType, ref } from "vue";
 defineProps({
   title: {
     type: String,
-    default: undefined,
+    default: "",
   },
 
   to: {

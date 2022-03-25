@@ -32,7 +32,7 @@
   </div>
   <!-- Regular link -->
   <router-link
-    v-else
+    v-else-if="to"
     :to="to"
     class="menu-link uppercase font-extrabold text-[color:var(--color-header-bottom-link)] hover:text-[color:var(--color-header-bottom-link-hover)] tracking-wide"
     :class="$attrs.class"
@@ -49,7 +49,7 @@ import { MenuLinkType } from "@/core/api/graphql/types";
 defineProps({
   title: {
     type: String,
-    default: undefined,
+    default: "",
   },
 
   to: {
