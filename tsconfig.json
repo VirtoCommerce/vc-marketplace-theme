@@ -17,7 +17,8 @@
     "paths": {
       "@/*": ["client-app/*"],
       "@core/*": ["client-app/core/*"]
-    }
+    },
+    "types": ["@intlify/vite-plugin-vue-i18n/client"]
   },
   "include": [
     "client-app/**/*.ts",
@@ -27,5 +28,5 @@
     "client-app/**/*.vue",
     "client-app/**/*.graphql"
   ],
-  "exclude": ["node_modules", "**/*.js"]
+  "exclude": ["node_modules", "assets", "**/*.js"]
 }

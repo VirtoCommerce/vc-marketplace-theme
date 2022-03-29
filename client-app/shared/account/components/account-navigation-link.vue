@@ -1,6 +1,6 @@
 <template>
   <router-link :to="to" class="flex items-center p-3 icon">
-    <div class="h-4 w-4"></div>
+    <div class="h-5 w-5"></div>
     <span class="ml-3 text-gray-500 font-extrabold text-sm">{{ text }}</span>
   </router-link>
 </template>
@@ -53,7 +53,7 @@ defineProps({
 /* Active/hover state styles */
 .router-link-active > div,
 .icon:hover > div {
-  background-color: orange;
+  background-color: var(--color-primary);
 }
 .icon:hover span {
   color: #4b5563;

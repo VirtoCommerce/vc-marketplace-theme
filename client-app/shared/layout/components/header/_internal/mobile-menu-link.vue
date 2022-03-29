@@ -5,11 +5,11 @@
       class="uppercase text-xl font-extrabold text-white flex items-center"
       @click="submenuVisible = !submenuVisible"
     >
-      <div>
+      <div class="truncate">
         <slot>{{ title }}</slot>
       </div>
       <i
-        class="fas ml-3 text-yellow-500 align-baseline"
+        class="fas ml-3 text-[color:var(--color-primary)] align-baseline"
         :class="[submenuVisible ? 'fa-chevron-up' : 'fa-chevron-down']"
       ></i>
     </div>
@@ -25,7 +25,7 @@
   </div>
   <!-- Regular link -->
   <router-link
-    v-else
+    v-else-if="to"
     :to="to"
     class="uppercase text-xl font-extrabold text-white"
     :class="$attrs.class"
@@ -36,13 +36,13 @@
 </template>
 
 <script setup lang="ts">
+import { MenuLinkType } from "@/core/api/graphql/types";
 import { PropType, ref } from "vue";
-import { IMenuItem } from "../../../";
 
 defineProps({
   title: {
     type: String,
-    default: undefined,
+    default: "",
   },
 
   to: {
@@ -51,7 +51,7 @@ defineProps({
   },
 
   children: {
-    type: Array as PropType<IMenuItem[]>,
+    type: Array as PropType<MenuLinkType[]>,
     default: null,
   },
 });

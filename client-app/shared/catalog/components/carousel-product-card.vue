@@ -15,14 +15,15 @@
       <!-- Product title -->
       <router-link
         :to="`/${SeoUrl.Product}/${product.id}`"
-        class="text-cyan-700 font-extrabold text-sm line-clamp-3 mt-2"
+        class="text-[color:var(--color-link)] font-extrabold text-sm line-clamp-3 mt-2"
       >
         {{ product.name }}
       </router-link>
 
       <!-- Product price -->
       <div class="text-sm mt-2">
-        <span class="text-green-700 font-extrabold"><VcPriceDisplay :value="product.price?.actual" /></span> / each
+        <span class="text-green-700 font-extrabold"><VcPriceDisplay :value="product.price?.actual" /></span
+        >{{ $t("common.suffixes.per_item") }}
       </div>
     </div>
   </div>

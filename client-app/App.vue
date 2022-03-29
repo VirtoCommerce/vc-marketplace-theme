@@ -1,5 +1,5 @@
 <template>
-  <div v-if="loaded" class="min-h-screen flex flex-col font-lato">
+  <div v-if="loaded" class="min-h-screen flex flex-col font-lato overflow-x-hidden">
     <Header />
     <div class="flex-grow flex flex-col">
       <RouterView />
@@ -12,20 +12,32 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import { Header, Footer } from "./shared/layout";
+import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
+import { Header, Footer, useSearchBar } from "./shared/layout";
 import { useUser } from "@/shared/account";
 import { useCart } from "@/shared/cart";
-import { useContext } from "@/shared/context";
-import { setCatalogId, setUserId } from "@/core/constants";
+import { themeContext } from "@/core/utilities";
+import { setCatalogId, setUserId, setLocale } from "@/core/constants";
 import { PopupHost } from "@/shared/popup";
 import { useRouter } from "vue-router";
 
+const router = useRouter();
+const breakpoints = useBreakpoints(breakpointsTailwind);
 const { loadMe, me, isAuthenticated } = useUser();
 const { loadMyCart } = useCart();
-const { loadContext, themeContext } = useContext();
-const { beforeEach } = useRouter();
+const { hideSearchBar, hideSearchDropdown } = useSearchBar();
 
-beforeEach(async (to) => {
+const isMobile = breakpoints.smaller("lg");
+const loaded = ref(false);
+
+router.beforeEach(async (to) => {
+  // Hiding the search bar or search results dropdown
+  if (to.name !== "Search") {
+    await hideSearchBar();
+  } else if (!isMobile.value) {
+    await hideSearchDropdown();
+  }
+
   // Load user if needed (used during SSR)
   if (!me.value.id) {
     await loadMe();
@@ -48,16 +60,14 @@ beforeEach(async (to) => {
   }
 });
 
-const loaded = ref(false);
-
 onMounted(async () => {
   await loadMe();
-  await loadContext();
 
   // FIXME
   // temporary solution
-  setUserId(themeContext.value?.userId || me.value?.id);
-  setCatalogId(themeContext.value.catalogId!);
+  setUserId(themeContext.userId || me.value?.id);
+  setCatalogId(themeContext.catalogId!);
+  setLocale(themeContext.language || "en-US");
 
   await loadMyCart();
   loaded.value = true;

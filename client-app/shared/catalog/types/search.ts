@@ -1,20 +1,13 @@
-export enum SearchQueryParamNames {
-  Page = "page",
-  Sort = "sort",
-  Filter = "filter",
-  Keyword = "keyword",
-  ItemsPerPage = "size",
-}
-
 export type ProductsSearchParams = {
-  page: number;
-  itemsPerPage: number;
-  keyword: string;
-  sort: string;
-  filter: string;
+  page?: number;
+  itemsPerPage?: number;
+  keyword?: string;
+  sort?: string;
+  filter?: string;
   fuzzy?: boolean;
   fuzzyLevel?: number;
   categoryId?: string;
+  productIds?: string[];
 };
 
 export type ProductsFilterValue = {
@@ -29,20 +22,4 @@ export type ProductsFilter = {
   paramName: string;
   type: "term" | "range";
   values: ProductsFilterValue[];
-};
-
-export type UseProductsSearchParamsOptions = {
-  sortList?: string[];
-  defaultSortBy?: string;
-  itemsPerPageList?: number[];
-  defaultItemsPerPage?: number;
-  // @default "push"
-  routeUpdateMethod?: "push" | "replace";
-};
-
-export type FromRouteQueryOptions = {
-  sortList?: string[];
-  defaultSortBy?: string;
-  itemsPerPageList?: number[];
-  defaultItemsPerPage?: number;
 };

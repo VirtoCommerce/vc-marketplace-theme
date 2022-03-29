@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white border shadow-sm rounded">
     <div class="border-b px-5 py-4 md:px-7">
-      <h2 class="text-xl font-extrabold uppercase">Price &amp; Delivery</h2>
+      <h2 class="text-xl font-extrabold uppercase" v-t="'shared.catalog.product_details.price_block.title'"></h2>
     </div>
     <div class="border-b px-5 py-8 md:px-7 md:py-5">
       <slot></slot>
@@ -10,17 +10,28 @@
       <div
         class="flex items-center justify-center flex-1 py-4 px-1 border-r space-x-2 cursor-pointer hover:bg-gray-100"
       >
-        <i class="fas fa-plus text-base text-yellow-500"></i>
-        <span class="text-sm text-blue-800 font-bold">Add to list</span>
+        <i class="fas fa-plus text-base text-[color:var(--color-primary)]"></i>
+        <span
+          class="text-sm text-blue-800 font-bold"
+          v-t="'shared.catalog.product_details.price_block.add_to_list_button'"
+        ></span>
       </div>
       <div
         class="flex items-center justify-center flex-1 py-4 px-1 border-r space-x-2 cursor-pointer hover:bg-gray-100"
       >
-        <i class="fas fa-envelope fa-xl text-yellow-500"></i><span class="text-sm text-blue-800 font-bold">Email</span>
+        <i class="fas fa-envelope fa-xl text-[color:var(--color-primary)]"></i
+        ><span
+          class="text-sm text-blue-800 font-bold"
+          v-t="'shared.catalog.product_details.price_block.send_email_button'"
+        ></span>
       </div>
       <div class="flex items-center justify-center flex-1 py-4 px-1 space-x-2 cursor-pointer hover:bg-gray-100">
-        <i class="fas fa-print text-yellow-500"></i>
-        <span class="text-sm text-blue-800 font-bold" @click="print()">Print</span>
+        <i class="fas fa-print text-[color:var(--color-primary)]"></i>
+        <span
+          class="text-sm text-blue-800 font-bold"
+          @click="print()"
+          v-t="'shared.catalog.product_details.price_block.print_button'"
+        ></span>
       </div>
     </div>
   </div>

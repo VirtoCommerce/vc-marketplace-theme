@@ -4,39 +4,43 @@
       <VcImageGallery :src="product.imgSrc ?? ''" :images="product.images ?? []" :is-mobile="isMobile" />
 
       <!-- Compare checkbox -->
-      <div class="mt-8 hidden md:flex items-center text-sm cursor-pointer">
+      <div v-if="$cfg.product_compare_enabled" class="mt-8 hidden md:flex items-center text-sm cursor-pointer">
         <input
           type="checkbox"
-          class="form-tick appearance-none w-5 h-5 border-2 border-gray-300 rounded-sm checked:bg-cyan-700 checked:border-transparent focus:outline-none cursor-pointer"
+          class="form-tick appearance-none w-5 h-5 border-2 border-gray-300 rounded-sm checked:bg-[color:var(--color-link)] checked:border-transparent focus:outline-none cursor-pointer"
         />
-        <span class="ml-2">Compare</span>
+        <span class="ml-2">{{ $t("common.labels.compare") }}</span>
       </div>
     </div>
 
     <div class="flex flex-col lg:w-2/3">
-      <ProductTitledBlock class="mt-5" image-src="/static/images/technical_specs.svg" title="technical specs">
+      <ProductTitledBlock
+        class="mt-5"
+        image-src="/static/images/technical_specs.svg"
+        :title="$t('shared.catalog.product_details.technical_specs_block_title')"
+      >
         <ProductProperties v-if="product.properties" :properties="product.properties" />
       </ProductTitledBlock>
 
       <!-- variations  -->
-      <ProductTitledBlock
-        v-if="product.variations?.length"
-        class="mt-5"
-        image-src="/static/images/variations_customize.svg"
-        title="Customize your order"
-      >
-        <ProductVariationCard class="mb-5" :variation="product" />
+      <div v-if="product.variations?.length" class="mt-5">
+        <ProductVariationCard class="mb-5" :variation="product" v-if="product.price?.actual?.amount" />
 
         <div v-for="(variation, i) in product.variations" :key="variation?.id ?? i">
-          <ProductVariationCard v-if="variation" class="mb-5" :variation="variation" :product="product" />
+          <ProductVariationCard
+            v-if="variation && variation.price?.actual?.amount"
+            class="mb-5"
+            :variation="variation"
+            :product="product"
+          />
         </div>
-      </ProductTitledBlock>
+      </div>
 
       <ProductTitledBlock
         v-if="product.description"
         class="mt-5"
         image-src="/static/images/description.svg"
-        title="Description"
+        :title="$t('shared.catalog.product_details.description_block_title')"
       >
         <VcMarkdownRender :src="product.description?.content" class="text-gray-500"></VcMarkdownRender>
       </ProductTitledBlock>

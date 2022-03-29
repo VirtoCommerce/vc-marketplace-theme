@@ -10,7 +10,25 @@
         <!-- Second column-->
         <div class="flex flex-col w-full lg:w-4/5 space-y-5">
           <div class="flex justify-between items-center mx-5 lg:mx-0">
-            <h2 class="text-gray-800 text-3xl font-bold uppercase">Orders</h2>
+            <h2 class="text-gray-800 text-3xl font-bold uppercase" v-t="'pages.account.orders.title'"></h2>
+          </div>
+          <div class="flex mx-5 lg:mx-0">
+            <input
+              v-model.trim="keyword"
+              :disabled="ordersLoading"
+              type="search"
+              class="flex-grow appearance-none bg-white rounded rounded-r-none h-9 px-4 font-medium outline-none text-sm border border-gray-300 focus:border-gray-400 disabled:bg-gray-200"
+              @keypress.enter="applyKeyword"
+            />
+            <VcButton
+              :is-disabled="ordersLoading"
+              class="px-4 rounded-l-none uppercase"
+              outline
+              size="md"
+              @click="applyKeyword"
+            >
+              <i class="fas fa-search text-lg"></i>
+            </VcButton>
           </div>
           <div class="flex flex-col bg-white shadow-sm" :class="{ 'rounded border': !isMobile }">
             <VcTable
@@ -27,7 +45,7 @@
               <template #mobile-item="itemData">
                 <div class="grid grid-cols-2 p-6 gap-y-4 border-b border-gray-200 cursor-pointer">
                   <div class="flex flex-col">
-                    <span class="text-sm text-gray-400"> Order number </span>
+                    <span class="text-sm text-gray-400" v-t="'pages.account.orders.order_number_label'"> </span>
                     <span class="pr-4 font-extrabold overflow-hidden overflow-ellipsis">
                       {{ itemData.item.number }}
                     </span>
@@ -38,45 +56,48 @@
                   </div>
 
                   <div class="flex flex-col">
-                    <span class="text-sm text-gray-400">Date</span>
+                    <span class="text-sm text-gray-400" v-t="'pages.account.orders.date_label'"></span>
                     <span class="overflow-hidden overflow-ellipsis">
                       {{ moment(itemData.item?.createdDate).format("YYYY-MM-DD") }}
                     </span>
                   </div>
 
                   <div class="flex flex-col">
-                    <span class="text-sm text-gray-400">Total</span>
+                    <span class="text-sm text-gray-400" v-t="'pages.account.orders.total_label'"></span>
                     <span class="overflow-hidden overflow-ellipsis">{{ itemData.item.total?.formattedAmount }}</span>
                   </div>
                 </div>
               </template>
               <template #mobile-empty>
                 <div class="flex items-center justify-center space-x-10 p-5">
-                  <img src="/static/images/account/icons/no-addresses.svg" alt="No orders" />
+                  <img
+                    src="/static/images/account/icons/no-addresses.svg"
+                    :alt="$t('pages.account.orders.no_orders_img_alt')"
+                  />
                   <div class="flex flex-col space-y-2">
-                    <span class="text-base">There are no orders yet</span>
+                    <span class="text-base" v-t="'pages.account.orders.no_orders_message'"></span>
                   </div>
                 </div>
               </template>
               <template #mobile-skeleton>
                 <div v-for="i of itemsPerPage" :key="i" class="grid grid-cols-2 p-6 gap-y-4 border-b border-gray-200">
                   <div class="flex flex-col">
-                    <span class="text-sm text-gray-400">Order number</span>
+                    <span class="text-sm text-gray-400" v-t="'pages.account.orders.order_number_label'"></span>
                     <div class="h-6 mr-4 bg-gray-200 animate-pulse"></div>
                   </div>
 
                   <div class="flex flex-col">
-                    <span class="text-sm text-gray-400">Date</span>
+                    <span class="text-sm text-gray-400" v-t="'pages.account.orders.date_label'"></span>
                     <div class="h-6 bg-gray-200 animate-pulse"></div>
                   </div>
 
                   <div class="flex flex-col">
-                    <span class="text-sm text-gray-400">Total</span>
+                    <span class="text-sm text-gray-400" v-t="'pages.account.orders.total_label'"></span>
                     <div class="h-6 mr-4 bg-gray-200 animate-pulse"></div>
                   </div>
 
                   <div class="flex flex-col">
-                    <span class="text-sm text-gray-400">Status</span>
+                    <span class="text-sm text-gray-400" v-t="'pages.account.orders.status_label'"></span>
                     <div class="h-6 bg-gray-200 animate-pulse"></div>
                   </div>
                 </div>
@@ -117,9 +138,12 @@
                 <tr>
                   <td colspan="6" class="polygons-bg">
                     <div class="flex items-center pl-56 space-x-10 h-80">
-                      <img src="/static/images/account/icons/no-addresses.svg" alt="No orders" />
+                      <img
+                        src="/static/images/account/icons/no-addresses.svg"
+                        :alt="$t('pages.account.orders.no_orders_img_alt')"
+                      />
                       <div class="flex flex-col space-y-2">
-                        <span class="text-base">There are no orders yet</span>
+                        <span class="text-base" v-t="'pages.account.orders.no_orders_message'"></span>
                       </div>
                     </div>
                   </td>
@@ -156,7 +180,7 @@
 </template>
 
 <script setup lang="ts">
-import { ITableColumn, TableStatusBadge, VcTable } from "@/components";
+import { ITableColumn, TableStatusBadge, VcTable, VcButton } from "@/components";
 import { AccountNavigation } from "@/shared/account";
 import { onMounted, ref } from "vue";
 import { sortAscending, sortDescending } from "@/core/constants";
@@ -165,9 +189,12 @@ import useUserOrders from "@/shared/account/composables/useUserOrders";
 import moment from "moment";
 import { useRouter } from "vue-router";
 import { CustomerOrderType } from "@/core/api/graphql/types";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
-const { loading: ordersLoading, orders, loadOrders, sort, pages, itemsPerPage, page } = useUserOrders();
+const { loading: ordersLoading, orders, loadOrders, sort, pages, itemsPerPage, page, keyword } = useUserOrders();
 
 const isMobile = breakpoints.smaller("md");
 
@@ -194,6 +221,11 @@ const applySorting = async (column: string) => {
   await loadOrders();
 };
 
+const applyKeyword = async () => {
+  page.value = 1;
+  await loadOrders();
+};
+
 onMounted(async () => {
   await loadOrders();
 });
@@ -201,31 +233,31 @@ onMounted(async () => {
 const columns = ref<ITableColumn[]>([
   {
     id: "number",
-    title: "Order number",
+    title: t("pages.account.orders.order_number_label"),
     sortable: true,
   },
   {
     id: "purchaseOrder",
-    title: "Purchase order",
+    title: t("pages.account.orders.purchase_number_label"),
   },
   {
     id: "invoice",
-    title: "Invoice",
+    title: t("pages.account.orders.invoice_label"),
   },
   {
     id: "createdDate",
-    title: "Date",
+    title: t("pages.account.orders.date_label"),
     sortable: true,
   },
   {
     id: "status",
-    title: "Status",
+    title: t("pages.account.orders.status_label"),
     sortable: true,
     titlePosition: "text-center",
   },
   {
     id: "total",
-    title: "Total",
+    title: t("pages.account.orders.total_label"),
     sortable: true,
     titlePosition: "text-right",
   },
