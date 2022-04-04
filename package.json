@@ -1,6 +1,6 @@
 {
   "name": "client-app",
-  "version": "0.0.6-marketplace",
+  "version": "0.0.7-marketplace",
   "private": true,
   "scripts": {
     "postinstall": "husky install",

@@ -63,12 +63,12 @@
         <!-- Sidebar -->
         <div class="flex flex-col px-5 mb-7 order-first md:px-0 lg:mb-0 lg:order-1 lg:w-1/4">
           <!-- Order summary -->
-          <OrderSummary v-if="order" :cart="order" class="mb-5"></OrderSummary>
-          <VcButton
-            class="uppercase w-full mb-5"
-            @click="openReorderPopup"
-            v-t="'pages.account.order_details.reorder_all_button'"
-          ></VcButton>
+          <OrderSummary v-if="order" :cart="order" class="mb-5" />
+
+          <VcButton class="uppercase w-full mb-5" @click="openReorderPopup">
+            {{ $t("pages.account.order_details.reorder_all_button") }}
+          </VcButton>
+
           <VcCard
             :title="$t('pages.account.order_details.shipping_address_card.title')"
             :is-collapsible="true"
@@ -132,13 +132,8 @@
                 {{ order?.inPayments?.[0]?.gatewayCode }}
               </p>
               <div class="mt-3">
-                <VcButton
-                  class="px-2 py-1 uppercase text-xs"
-                  size="xs"
-                  is-outline
-                  :is-disabled="true"
-                  v-t="'pages.account.order_details.payment_details_card.view_invoice_button'"
-                >
+                <VcButton class="px-2 py-1 uppercase text-xs" size="xs" is-outline :is-disabled="true">
+                  {{ $t("pages.account.order_details.payment_details_card.view_invoice_button") }}
                 </VcButton>
               </div>
             </div>
@@ -209,9 +204,9 @@ const orderItems = computed(() =>
 const giftItems = computed(() => order.value?.items?.filter((item) => item.isGift));
 
 const breadcrumbs = ref<IBreadcrumbs[]>([
-  { title: t("common.links.home"), url: "/" },
-  { title: t("common.links.account"), url: "/account" },
-  { title: t("common.links.orders"), url: "/account/orders" },
+  { title: t("common.links.home"), route: "/" },
+  { title: t("common.links.account"), route: "/account" },
+  { title: t("common.links.orders"), route: "/account/orders" },
 ]);
 
 const openReorderPopup = async () => {
@@ -235,6 +230,6 @@ const openReorderPopup = async () => {
 
 onMounted(async () => {
   await loadOrder(orderId.value);
-  breadcrumbs.value.push({ title: `${order.value?.number}`, url: `/account/order-details/${order.value?.id}` });
+  breadcrumbs.value.push({ title: `${order.value?.number}`, route: `/account/order-details/${order.value?.id}` });
 });
 </script>

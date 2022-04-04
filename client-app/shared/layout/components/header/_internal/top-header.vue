@@ -8,6 +8,8 @@
       <div class="mx-3 h-1 w-1 bg-[color:var(--color-primary)] rounded"></div>
       <TopHeaderLink to="/account/orders" v-t="'shared.layout.header.top_header.link_order_history'"></TopHeaderLink>
       <div class="mx-3 h-1 w-1 bg-[color:var(--color-primary)] rounded"></div>
+      <TopHeaderLink :to="{ name: 'Lists' }" v-t="'shared.layout.header.top_header.link_lists'"></TopHeaderLink>
+      <div class="w-px h-5 bg-[color:var(--color-primary)] mx-4 hidden lg:block"></div>
 
       <!-- Account menu -->
       <div ref="loginMenu" class="relative">

@@ -9,7 +9,7 @@
 
         <!-- Second column-->
         <div class="flex flex-col w-full lg:w-4/5 space-y-5">
-          <div class="flex justify-between items-center mx-5 lg:mx-0">
+          <div class="flex justify-between items-center mx-5 md:mx-0">
             <h2 class="text-gray-800 text-3xl font-bold uppercase" v-t="'pages.account.checkout_defaults.title'"></h2>
           </div>
           <div class="bg-white shadow-sm rounded border px-7 py-7 md:px-9 md:py-8">
@@ -50,13 +50,12 @@
               >
                 <template #selected="{ item }">{{ item?.code }} {{ item?.optionName }}</template>
                 <template #first>{{ $t("pages.account.checkout_defaults.not_selected_placeholder") }}</template>
-                <template #item="{ item }"> {{ item?.code }} {{ item?.optionName }} </template>
+                <template #item="{ item }"> {{ item?.code }} {{ item?.optionName }}</template>
               </VcSelect>
-              <VcButton
-                class="uppercase mt-8 px-12 self-center lg:self-start"
-                @click="saveDefaults()"
-                v-t="'pages.account.checkout_defaults.update_button'"
-              ></VcButton>
+
+              <VcButton class="uppercase mt-8 px-12 self-center lg:self-start" @click="saveDefaults()">
+                {{ $t("pages.account.checkout_defaults.update_button") }}
+              </VcButton>
             </div>
           </div>
         </div>

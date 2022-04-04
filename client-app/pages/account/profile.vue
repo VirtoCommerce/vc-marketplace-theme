@@ -9,7 +9,7 @@
 
         <!-- Second column-->
         <div class="flex flex-col w-full lg:w-4/5 space-y-5">
-          <div class="flex justify-between items-center mx-5 lg:mx-0">
+          <div class="flex justify-between items-center mx-5 md:mx-0">
             <h2 class="text-gray-800 text-3xl font-bold uppercase" v-t="'pages.account.profile.title'"></h2>
           </div>
           <div class="flex flex-col bg-white shadow-sm p-6" :class="{ 'rounded border polygon-bg': !isMobile }">
@@ -55,8 +55,8 @@
                   size="lg"
                   class="uppercase mt-6 lg:mt-3 w-full lg:w-48"
                   :is-waiting="!isSubmitEnabled"
-                  v-t="'pages.account.profile.update_button'"
                 >
+                  {{ $t("pages.account.profile.update_button") }}
                 </VcButton>
               </div>
             </form>

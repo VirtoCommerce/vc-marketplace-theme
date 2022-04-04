@@ -9,5 +9,7 @@
     "bradlc.vscode-tailwindcss",
     "johnsoncodehk.volar"
   ],
-  "unwantedRecommendations": ["octref.vetur"]
+  "unwantedRecommendations": [
+    "octref.vetur"
+  ]
 }

@@ -42,8 +42,8 @@
                   outline
                   size="sm"
                   @click="onSearchStart"
-                  v-t="'pages.catalog.search_card.search_button'"
                 >
+                  {{ $t("pages.catalog.search_card.search_button") }}
                 </VcButton>
               </div>
             </VcCard>
@@ -74,7 +74,6 @@
                   :value="item.value"
                   :disabled="loading"
                   class="mt-3 first:mt-0"
-                  color="[color:var(--color-primary)]"
                   @change="applyFilters"
                 >
                   <div class="flex">
@@ -141,8 +140,8 @@
                 :to="{ name: 'Product', params: { productId: item.id } }"
                 :class="{ 'w-full': viewModeQueryParam === 'list' }"
                 class="uppercase mb-4"
-                v-t="'pages.catalog.choose_button'"
               >
+                {{ $t("pages.catalog.choose_button") }}
               </VcButton>
 
               <AddToCart v-else :product="item" />
