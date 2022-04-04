@@ -22,6 +22,11 @@
         class="orders-icon"
       ></AccountNavigationLink>
       <AccountNavigationLink
+        :to="{ name: 'Lists' }"
+        :text="$t('shared.account.navigation.links.your_lists')"
+        class="list-icon"
+      ></AccountNavigationLink>
+      <AccountNavigationLink
         to="/account/checkout-defaults"
         :text="$t('shared.account.navigation.links.checkout_defaults')"
         class="checkout-icon"

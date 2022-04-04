@@ -9,7 +9,7 @@
 
         <!-- Second column-->
         <div class="flex flex-col w-full lg:w-4/5 space-y-5">
-          <div class="flex justify-between items-center mx-5 lg:mx-0">
+          <div class="flex justify-between items-center mx-5 md:mx-0">
             <h2 class="text-gray-800 text-3xl font-bold uppercase">{{ title }}</h2>
 
             <VcButton v-if="!editingMode" class="px-3 uppercase border" size="sm" is-outline @click="openEditMode()">
@@ -41,8 +41,8 @@
                     class="uppercase w-32 sm:w-auto sm:px-12"
                     is-outline
                     @click="closeEditMode"
-                    v-t="'pages.account.addresses.cancel_button'"
                   >
+                    {{ $t("pages.account.addresses.cancel_button") }}
                   </VcButton>
 
                   <VcButton
@@ -112,11 +112,10 @@
                     />
                     <div class="flex flex-col space-y-2">
                       <span class="text-base" v-t="'pages.account.addresses.no_addresses_message'"></span>
-                      <VcButton
-                        class="uppercase w-full"
-                        @click="openEditMode()"
-                        v-t="'pages.account.addresses.add_new_address_button'"
-                      ></VcButton>
+
+                      <VcButton class="uppercase w-full" @click="openEditMode()">
+                        {{ $t("pages.account.addresses.add_new_address_button") }}
+                      </VcButton>
                     </div>
                   </div>
                 </template>
@@ -194,15 +193,15 @@
                         />
                         <div class="flex flex-col space-y-2">
                           <span class="text-base" v-t="'pages.account.addresses.no_addresses_message'"></span>
-                          <VcButton
-                            class="uppercase w-full"
-                            @click="openEditMode()"
-                            v-t="'pages.account.addresses.add_new_address_button'"
-                          ></VcButton>
+
+                          <VcButton class="uppercase w-full" @click="openEditMode()">
+                            {{ $t("pages.account.addresses.add_new_address_button") }}
+                          </VcButton>
                         </div>
                       </div>
-                    </td></tr
-                ></template>
+                    </td>
+                  </tr>
+                </template>
                 <template #desktop-skeleton>
                   <tr v-for="i of itemsPerPage" :key="i" class="even:bg-gray-50">
                     <td class="p-5">

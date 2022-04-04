@@ -2,7 +2,7 @@
   <div class="fixed bg-gray-800 opacity-95 z-50 w-full h-screen flex flex-col">
     <div class="px-6 flex justify-between items-center h-14 flex-shrink-0">
       <router-link to="/" @click="$emit('close')">
-        <VcImage src="/static/images/common/logo.png" class="h-9" />
+        <VcImage :src="$cfg.logo_inverted_image" class="h-9" />
       </router-link>
       <i class="fas fa-times text-2xl text-[color:var(--color-primary)]" @click="$emit('close')"></i>
     </div>
@@ -20,13 +20,28 @@
         >
           <template v-if="item.id === 'checkout'">
             <div class="flex items-center">
-              <i class="fas fa-shopping-cart text-[color:var(--color-primary)] mr-3"></i>
-              <div>{{ item.title }}</div>
+              <i class="fas fa-shopping-cart text-[color:var(--color-primary)] mr-3" />
+
+              <span>{{ item.title }}</span>
+
               <div
                 v-if="cart?.itemsQuantity"
                 class="flex items-center rounded-2xl border border-[color:var(--color-primary)] px-3 font-bold text-sm h-7 ml-3"
               >
                 {{ cart.itemsQuantity }}
+              </div>
+            </div>
+          </template>
+
+          <template v-else-if="item.id === 'compare'">
+            <div class="flex items-center">
+              <span>{{ item.title }}</span>
+
+              <div
+                v-if="productsIds.length"
+                class="flex items-center rounded-2xl border border-[color:var(--color-primary)] px-3 font-bold text-sm h-7 ml-3"
+              >
+                {{ productsIds.length }}
               </div>
             </div>
           </template>
@@ -90,8 +105,7 @@ import { ref } from "vue";
 import { MenuLinkType } from "@/core/api/graphql/types";
 import { VcImage } from "@/components";
 import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
+import { useCompareProducts } from "@/shared/compare";
 
 defineProps({
   isVisible: {
@@ -104,6 +118,8 @@ defineEmits(["close"]);
 
 const { me, isAuthenticated, signMeOut } = useUser();
 const { cart } = useCart();
+const { productsIds } = useCompareProducts();
+const { t } = useI18n();
 
 const headerMenu = menuSchema?.header?.main;
 
@@ -112,6 +128,7 @@ const myAccountMenu = ref<MenuLinkType[]>([
   { title: t("shared.layout.header.mobile.account_menu.profile"), url: "/account/profile" },
   { title: t("shared.layout.header.mobile.account_menu.addresses"), url: "/account/addresses" },
   { title: t("shared.layout.header.mobile.account_menu.orders"), url: "/account/orders" },
+  { title: t("shared.layout.header.mobile.account_menu.your_lists"), url: "/account/lists" },
   { title: t("shared.layout.header.mobile.account_menu.checkout_defaults"), url: "/account/checkout-defaults" },
 ]);
 

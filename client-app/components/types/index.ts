@@ -1,4 +1,5 @@
 import { SwiperOptions } from "swiper/types/swiper-options";
+import { RouteLocationRaw } from "vue-router";
 
 type NonNullableSwiperOptions = {
   [prop in keyof Omit<
@@ -28,7 +29,7 @@ export interface ItemAction {
 
 export interface IBreadcrumbs {
   title: string;
-  url: string;
+  route: RouteLocationRaw;
 }
 
 export interface ITableColumn {
@@ -36,4 +37,8 @@ export interface ITableColumn {
   title: string;
   sortable?: boolean;
   titlePosition?: "text-center" | "text-right" | "text-left";
+}
+
+export interface IProductProperties {
+  [key: string]: { value: string }[];
 }
