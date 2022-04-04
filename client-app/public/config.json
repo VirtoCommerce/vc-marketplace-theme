@@ -2,7 +2,7 @@
   "current": "Mercury",
   "presets": {
     "Mercury": {
-      "product_compare_enabled": true,
+      "product_compare_enabled": false,
       "product_compare_limit": 5,
 
       "checkout_comment_enabled": true,
