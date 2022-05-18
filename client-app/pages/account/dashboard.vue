@@ -5,13 +5,13 @@
         class="md:hidden text-gray-800 px-5 text-3xl font-bold uppercase mb-5"
         v-t="'pages.account.dashboard.title'"
       ></h2>
-      <div class="flex">
+      <div class="flex md:space-x-5">
         <!-- First column-->
         <div class="hidden lg:flex flex-col lg:w-1/5 space-y-5">
           <AccountNavigation></AccountNavigation>
         </div>
         <!-- Second column-->
-        <div class="flex flex-col w-full px-5 space-y-5 lg:w-4/5">
+        <div class="flex flex-col w-full px-5 md:px-0 space-y-5 lg:w-4/5">
           <VcCard :title="$t('pages.account.dashboard.last_orders_card.title')" :full-width-content="true">
             <template #header-button>
               <div v-if="isMobile">
@@ -224,16 +224,55 @@
               </template>
             </VcTable>
           </VcCard>
+          <div class="flex flex-col space-y-5 lg:flex-row lg:space-x-5 lg:space-y-0">
+            <VcCard :title="$t('pages.account.dashboard.monthly_report_card.title')" class="lg:w-1/2">
+              <div class="flex content-center space-x-9 lg:space-x-4">
+                <VcImage
+                  src="/static/images/dashboard/spend-chart.svg"
+                  class="h-24 w-24"
+                  :alt="$t('pages.account.dashboard.monthly_report_card.spend_chart_alt')"
+                  lazy
+                />
+                <div
+                  class="flex flex-col space-y-1 sm:space-y-0 sm:flex-row sm:flex-wrap sm:space-x-5 sm:items-center xl:space-x-7 justify-center"
+                >
+                  <div class="flex flex-col lg:items-center lg:space-y-3">
+                    <span
+                      class="text-xs text-gray-400 lg:text-gray-600 lg:font-bold"
+                      v-t="'pages.account.dashboard.monthly_report_card.budget_title'"
+                    ></span>
+                    <span class="text-xl font-extrabold">$58,152</span>
+                  </div>
+                  <div class="flex flex-col lg:items-center lg:space-y-3">
+                    <span
+                      class="text-xs text-gray-400 lg:text-gray-600 lg:font-bold"
+                      v-t="'pages.account.dashboard.monthly_report_card.total_spend_label'"
+                    ></span>
+                    <span class="text-xl font-extrabold">$530,152</span>
+                  </div>
+                </div>
+              </div>
+            </VcCard>
+            <VcCard
+              :title="$t('pages.account.dashboard.orders_status_card.title')"
+              class="h-52 lg:h-auto lg:w-1/2"
+            ></VcCard>
+          </div>
           <!-- Commented due to accetpance criteria, will be used in future-->
           <!-- <VcCard title="Users" class="h-52"></VcCard> -->
         </div>
+        <!-- Third column-->
+        <!-- Commented due to accetpance criteria, will be used in future-->
+        <!-- <div class="hidden lg:flex flex-col lg:w-1/5 space-y-5">
+          <VcCard title="Current user roles" class="h-80"></VcCard>
+        </div> -->
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ITableColumn, VcCard, VcTable, TableStatusBadge, VcButton } from "@/components";
+import { ITableColumn, VcCard, VcImage, VcTable, TableStatusBadge, VcButton } from "@/components";
 import { CustomerOrderType } from "@/core/api/graphql/types";
 import { sortDescending } from "@/core/constants";
 import { AccountNavigation } from "@/shared/account";

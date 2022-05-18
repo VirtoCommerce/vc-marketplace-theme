@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-100 pt-7 pb-16 shadow-inner grow">
+  <div class="bg-gray-100 pt-7 pb-16 shadow-inner grow" :class="{ 'polygon-gray-bg': !products.length && !loading }">
     <div class="max-w-screen-2xl px-5 md:px-12 mx-auto">
       <!-- Breadcrumbs -->
       <Breadcrumbs class="mb-2 md:mb-8" :items="breadcrumbsItems"></Breadcrumbs>
@@ -8,7 +8,7 @@
         <!-- Mobile sidebar back cover -->
         <div
           :class="{ hidden: !mobileSidebarVisible }"
-          class="fixed z-40 inset-0 w-full h-screen lg:hidden bg-gray-800 opacity-95"
+          class="fixed z-50 inset-0 w-full h-screen lg:hidden bg-gray-800 opacity-95"
           @click="hideMobileSidebar"
         />
 
@@ -46,6 +46,13 @@
                   {{ $t("pages.catalog.search_card.search_button") }}
                 </VcButton>
               </div>
+            </VcCard>
+
+            <!-- Previously purchased -->
+            <VcCard :title="$t('pages.catalog.instock_filter_card.title')">
+              <VcCheckbox v-model="showInStock" :disabled="loading" @change="applyFilters">
+                {{ $t("pages.catalog.instock_filter_card.checkbox_label") }}
+              </VcCheckbox>
             </VcCard>
 
             <!-- Facet Filters Skeletons -->
@@ -88,74 +95,158 @@
 
         <!-- Content -->
         <div class="lg:w-3/4 xl:w-4/5 flex-grow">
-          <div class="flex flex-col">
-            <h2 class="text-gray-800 text-2xl lg:text-3xl font-bold uppercase">{{ selectedCategory?.label }}</h2>
+          <h2 class="text-gray-800 text-2xl lg:text-3xl font-bold uppercase">{{ selectedCategory?.label }}</h2>
 
-            <p class="py-3">
-              <span class="font-extrabold">{{ $t("pages.catalog.products_found_message", [total]) }}</span>
-            </p>
+          <p class="py-3">
+            <span class="font-extrabold">{{ $t("pages.catalog.products_found_message", [total]) }}</span>
+          </p>
 
-            <div class="flex justify-start mb-6 mt-4">
-              <!-- Mobile filters toggler -->
-              <div class="lg:hidden mr-3">
-                <VcButton class="px-4 font-extrabold" size="md" @click="mobileSidebarVisible = true">
-                  <i class="fas fa-filter mr-1"></i> {{ $t("pages.catalog.filters_button") }}
-                </VcButton>
-              </div>
+          <div ref="stickyMobileHeaderAnchor" class="-mb-2"></div>
 
-              <!-- View options -->
-              <ViewMode v-model:mode="viewModeQueryParam" class="hidden md:inline-flex mr-6" />
+          <div
+            class="sticky lg:relative top-0 z-10 flex items-center h-14 mt-2 mb-3"
+            :class="{
+              'z-40 px-5 md:px-12 -mx-5 md:-mx-12 bg-[color:var(--color-header-bottom-bg)]':
+                isVisibleStickyMobileHeader,
+            }"
+          >
+            <!-- Mobile filters toggler -->
+            <div class="lg:hidden mr-3">
+              <VcButton class="px-4 font-extrabold" size="md" @click="mobileSidebarVisible = true">
+                <i class="fas fa-filter mr-1"></i> {{ $t("pages.catalog.filters_button") }}
+              </VcButton>
+            </div>
 
-              <!-- Sorting -->
-              <div class="flex items-center flex-grow md:flex-grow-0 ml-auto">
-                <span class="hidden lg:block shrink-0 mr-2" v-t="'pages.catalog.sort_by_label'"></span>
+            <!-- View options -->
+            <ViewMode v-model:mode="viewModeQueryParam" class="hidden md:inline-flex mr-6" />
 
-                <VcSelect
-                  v-model="sortQueryParam"
-                  text-field="name"
-                  value-field="id"
-                  :is-disabled="loading"
-                  :items="productSortingList"
-                  class="w-full md:w-52 lg:w-64"
-                />
-              </div>
+            <!-- Sorting -->
+            <div class="flex items-center flex-grow md:flex-grow-0 z-10 ml-auto">
+              <span class="hidden lg:block shrink-0 mr-2" v-t="'pages.catalog.sort_by_label'"></span>
+
+              <VcSelect
+                v-model="sortQueryParam"
+                text-field="name"
+                value-field="id"
+                :is-disabled="loading"
+                :items="productSortingList"
+                class="w-full md:w-52 lg:w-64"
+              />
             </div>
           </div>
 
-          <!-- Products -->
-          <DisplayProducts
-            :loading="loading"
-            :view-mode="viewModeQueryParam"
-            :items-per-page="itemsPerPage"
-            :products="products"
-            :class="
-              viewModeQueryParam === 'list'
-                ? 'space-y-5'
-                : 'grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6 xl:gap-x-6 xl:gap-y-8'
-            "
-          >
-            <template #cart-handler="{ item }">
-              <VcButton
-                v-if="item.hasVariations"
-                :to="{ name: 'Product', params: { productId: item.id } }"
-                :class="{ 'w-full': viewModeQueryParam === 'list' }"
-                class="uppercase mb-4"
-              >
-                {{ $t("pages.catalog.choose_button") }}
-              </VcButton>
+          <!-- Filters chips -->
+          <div v-if="isExistSelectedFilters || showInStock" class="flex flex-wrap gap-x-3 gap-y-2 pb-6">
+            <VcChip
+              class="[--color-primary:#292D3B] [--color-primary-hover:#12141A]"
+              size="sm"
+              is-outline
+              clickable
+              closable
+              @click="resetFilters"
+              @close="resetFilters"
+            >
+              {{ $t("pages.catalog.reset_filters_button") }}
+            </VcChip>
 
-              <AddToCart v-else :product="item" />
+            <template v-for="filter in filters">
+              <template v-for="filterItem in filter.values">
+                <VcChip
+                  v-if="filterItem.selected"
+                  :key="filter.paramName + filterItem.value"
+                  class="[--color-primary:#292D3B] [--color-primary-hover:#12141A]"
+                  size="sm"
+                  closable
+                  @close="
+                    removeFilterItem({
+                      paramName: filter.paramName,
+                      value: filterItem.value,
+                    })
+                  "
+                >
+                  {{ filterItem.label }}
+                </VcChip>
+              </template>
             </template>
-          </DisplayProducts>
 
-          <VcInfinityScrollLoader
-            v-if="!loading"
-            :loading="loadingMore"
-            distance="400"
-            class="mt-9 -mb-6"
-            @visible="loadMoreProducts"
-          />
-          <VcScrollTopButton></VcScrollTopButton>
+            <template v-if="showInStock">
+              <VcChip
+                class="[--color-primary:#292D3B] [--color-primary-hover:#12141A]"
+                size="sm"
+                closable
+                @close="
+                  showInStock = false;
+                  applyFilters();
+                "
+              >
+                {{ $t("pages.catalog.instock_filter_card.title") }}
+              </VcChip>
+            </template>
+          </div>
+
+          <!-- Products -->
+          <template v-if="products.length || loading">
+            <DisplayProducts
+              :loading="loading"
+              :view-mode="viewModeQueryParam"
+              :items-per-page="itemsPerPage"
+              :products="products"
+              :class="
+                viewModeQueryParam === 'list'
+                  ? 'space-y-5'
+                  : 'grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6 xl:gap-x-6 xl:gap-y-8'
+              "
+            >
+              <template #cart-handler="{ item }">
+                <VcButton
+                  v-if="item.hasVariations"
+                  :to="{ name: 'Product', params: { productId: item.id } }"
+                  :class="{ 'w-full': viewModeQueryParam === 'list' }"
+                  class="uppercase mb-4"
+                >
+                  {{ $t("pages.catalog.choose_button") }}
+                </VcButton>
+
+                <AddToCart v-else :product="item" />
+              </template>
+            </DisplayProducts>
+
+            <VcInfinityScrollLoader
+              v-if="!loading"
+              :loading="loadingMore"
+              distance="400"
+              class="mt-9 -mb-6"
+              @visible="loadMoreProducts"
+            />
+
+            <VcScrollTopButton />
+          </template>
+
+          <!-- Empty view -->
+          <VcEmptyView
+            :text="
+              isExistSelectedFilters || showInStock || keywordQueryParam !== ''
+                ? $t('pages.catalog.no_products_filtered_message')
+                : $t('pages.catalog.no_products_message')
+            "
+            class="h-96"
+            v-else
+          >
+            <template #icon>
+              <VcImage src="/static/images/common/stock.svg" :alt="$t('pages.catalog.products_icon')" />
+            </template>
+            <template #button>
+              <VcButton
+                class="px-6 uppercase"
+                size="lg"
+                @click="resetFiltersWithKeyword"
+                v-if="isExistSelectedFilters || showInStock || keywordQueryParam !== ''"
+              >
+                <i class="fas fa-undo text-inherit -ml-0.5 mr-2.5"></i>
+                {{ $t("pages.catalog.no_products_button") }}
+              </VcButton>
+            </template>
+          </VcEmptyView>
         </div>
       </div>
     </div>
@@ -173,8 +264,9 @@ import {
   PropType,
   onBeforeUnmount,
   WatchStopHandle,
+  triggerRef,
 } from "vue";
-import { breakpointsTailwind, useBreakpoints, whenever } from "@vueuse/core";
+import { breakpointsTailwind, eagerComputed, useBreakpoints, whenever } from "@vueuse/core";
 import {
   Breadcrumbs,
   IBreadcrumbsItem,
@@ -184,18 +276,23 @@ import {
   useProducts,
   ViewMode,
   ProductsSearchParams,
+  ProductsFilterValue,
+  ProductsFilter,
 } from "@/shared/catalog";
 import {
   VcButton,
   VcCard,
   VcCardSkeleton,
   VcCheckbox,
+  VcChip,
   VcInfinityScrollLoader,
   VcSelect,
   VcScrollTopButton,
+  VcEmptyView,
+  VcImage,
 } from "@/components";
 import { AddToCart } from "@/shared/cart";
-import { useRouteQueryParam } from "@core/composables";
+import { useElementVisibility, useRouteQueryParam } from "@core/composables";
 import { defaultPageSize, productSortingList } from "@core/constants";
 import QueryParamName from "@core/query-param-name.enum";
 import { useI18n } from "vue-i18n";
@@ -213,17 +310,23 @@ const props = defineProps({
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const { selectedCategory, selectCategoryBySeoUrl, loadCategoriesTree } = useCategories();
-const { fetchProducts, fetchMoreProducts, loading, loadingMore, products, total, pages, filters } = useProducts({
-  withFilters: true,
-});
+const { fetchProducts, fetchMoreProducts, loading, loadingMore, products, total, pages, filters, showInStock } =
+  useProducts({
+    withFilters: true,
+  });
+
+const FILTERS_RESET_TIMEOUT_IN_MS = 500;
 
 const isMobile = breakpoints.smaller("md");
 const isMobileSidebar = breakpoints.smaller("lg");
 const mobileSidebarVisible = ref(false);
 const sidebarElement = shallowRef<HTMLElement | null>(null);
+const stickyMobileHeaderAnchor = shallowRef<HTMLElement | null>(null);
 const keyword = ref("");
 const page = ref(1);
 const itemsPerPage = ref(defaultPageSize);
+
+const stickyMobileHeaderAnchorIsVisible = useElementVisibility(stickyMobileHeaderAnchor, { direction: "top" });
 
 const viewModeQueryParam = useRouteQueryParam<"grid" | "list">("viewMode", {
   defaultValue: "grid",
@@ -243,6 +346,10 @@ const filterQueryParam = useRouteQueryParam<string>(QueryParamName.Filter, {
   defaultValue: "",
 });
 
+const isVisibleStickyMobileHeader = computed<boolean>(
+  () => !stickyMobileHeaderAnchorIsVisible.value && isMobileSidebar.value
+);
+
 const categorySeoUrl = computed<string>(() =>
   typeof props.categorySeoUrls === "string"
     ? props.categorySeoUrls
@@ -257,7 +364,10 @@ const searchParams = computed<ProductsSearchParams>(() => ({
   filter: filterQueryParam.value,
 }));
 
-const isAppliedKeyword = computed<boolean>(() => keyword.value === keywordQueryParam.value);
+const isAppliedKeyword = eagerComputed<boolean>(() => keyword.value === keywordQueryParam.value);
+const isExistSelectedFilters = eagerComputed<boolean>(() =>
+  filters.value.some((filter) => filter.values.some((value) => value.selected))
+);
 
 const breadcrumbsItems = computed<IBreadcrumbsItem[]>(() => {
   const items: IBreadcrumbsItem[] = [{ url: "/", title: t("common.links.home") }];
@@ -290,7 +400,31 @@ function onSearchStart() {
 
 function applyFilters() {
   hideMobileSidebar();
-  filterQueryParam.value = toFilterExpression(filters);
+  filterQueryParam.value = toFilterExpression(filters, showInStock);
+  triggerRef(filters);
+}
+
+function removeFilterItem(payload: Pick<ProductsFilter, "paramName"> & Pick<ProductsFilterValue, "value">) {
+  const filter = filters.value.find((item) => item.paramName === payload.paramName);
+  const filterItem = filter?.values.find((item) => item.value === payload.value);
+
+  if (filterItem) {
+    filterItem.selected = false;
+    applyFilters();
+  }
+}
+
+function resetFilters() {
+  filters.value.forEach((filter) => filter.values.forEach((filterItem) => (filterItem.selected = false)));
+  showInStock.value = false;
+  applyFilters();
+}
+
+function resetFiltersWithKeyword() {
+  keywordQueryParam.value = "";
+  setTimeout(() => {
+    resetFilters();
+  }, FILTERS_RESET_TIMEOUT_IN_MS);
 }
 
 async function loadProducts() {

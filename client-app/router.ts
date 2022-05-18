@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import { RouteRecordRaw } from "vue-router";
 import SeoUrl from "@core/seo-routes.enum";
 
 // Pages
@@ -22,6 +22,7 @@ const ResetPassword = () => import("./pages/reset-password/reset-password.vue");
 const OrderDetails = () => import("./pages/account/order-details.vue");
 const Orders = () => import("./pages/account/orders.vue");
 const Lists = () => import("./pages/account/lists.vue");
+const ListDetails = () => import("./pages/account/list-details.vue");
 const Profile = () => import("./pages/account/profile.vue");
 const DemoLanding = () => import("./pages/demo-landing/demo-landing.vue");
 const CompareProducts = () => import("./pages/compare-products/compare-products.vue");
@@ -47,7 +48,7 @@ const routes: RouteRecordRaw[] = [
       { path: "orders", name: "Orders", component: Orders },
       { path: "order-details/:id", name: "OrderDetails", component: OrderDetails },
       { path: "lists", name: "Lists", component: Lists },
-      { path: "lists/:listId", name: "ListDetails", component: {}, props: true }, // TODO: implement in another user story
+      { path: "lists/:listId", name: "ListDetails", component: ListDetails, props: true },
     ],
   },
   { path: "/forgot-password", name: "ForgotPassword", component: ForgotPassword },
@@ -72,24 +73,4 @@ if (import.meta.env.MODE === "development") {
   });
 }
 
-// Router definition
-const router = createRouter({
-  routes,
-
-  // History mode
-  history: createWebHistory(),
-
-  // Setup scroll behavior on route change
-  scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) {
-      return savedPosition;
-    } else {
-      return {
-        top: 0,
-        behavior: "smooth",
-      };
-    }
-  },
-});
-
-export default router;
+export default routes;

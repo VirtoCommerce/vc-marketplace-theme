@@ -4,7 +4,7 @@
     v-click-outside="() => searchDropdownVisible && hideSearchDropdown()"
   >
     <router-link to="/">
-      <VcImage :src="$cfg.logo_inverted_image" class="h-12 mr-8" lazy />
+      <VcImage :src="$cfg.logo_inverted_image" class="h-12 mr-8" />
     </router-link>
 
     <div class="flex flex-grow relative">
@@ -19,7 +19,7 @@
         @input="searchDropdownVisible && hideSearchDropdown()"
       />
 
-      <VcButton class="uppercase px-4 h-10" @click="search">
+      <VcButton class="uppercase px-4 !h-10" @click="search">
         {{ $t("shared.layout.search_bar.search_button") }}
       </VcButton>
 
@@ -27,7 +27,7 @@
       <transition name="slide-fade-top">
         <div
           v-if="searchDropdownVisible"
-          class="absolute top-14 w-full flex flex-col gap-3 rounded bg-white shadow-lg overflow-hidden"
+          class="absolute top-14 z-20 w-full flex flex-col gap-3 rounded bg-white shadow-lg overflow-hidden"
         >
           <!-- Results -->
           <template v-if="categories.length || products.length">
@@ -152,7 +152,9 @@ const categoriesColumns = computed<Array<Category[]>>(() => {
 });
 
 async function search() {
-  if (loading.value || !searchPhrase.value || searchPhrase.value.length > 30) {
+  const MAX_LENGTH = 30;
+  const COLUMNS = 5;
+  if (loading.value || !searchPhrase.value || searchPhrase.value.length > MAX_LENGTH) {
     return;
   }
 
@@ -162,7 +164,7 @@ async function search() {
       itemsPerPage: 9,
     },
     categories: {
-      itemsPerPage: CATEGORIES_ITEMS_PER_COLUMN * 5, // five columns
+      itemsPerPage: CATEGORIES_ITEMS_PER_COLUMN * COLUMNS,
     },
   });
 

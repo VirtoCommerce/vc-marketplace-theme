@@ -1,5 +1,10 @@
 <template>
-  <div class="bg-gray-100 flex-grow pt-6 pb-16 shadow-inner">
+  <div
+    class="bg-gray-100 flex-grow pt-6 pb-16 shadow-inner"
+    :class="{ 'polygon-gray-bg': !paginatedAddresses.length && !addressesLoading }"
+  >
+    <BackButtonInHeader v-if="isMobile && editingMode" @click="closeEditMode" />
+
     <div class="max-w-screen-2xl md:px-12 mx-auto">
       <div class="flex lg:space-x-5">
         <!-- First column-->
@@ -12,16 +17,38 @@
           <div class="flex justify-between items-center mx-5 md:mx-0">
             <h2 class="text-gray-800 text-3xl font-bold uppercase">{{ title }}</h2>
 
-            <VcButton v-if="!editingMode" class="px-3 uppercase border" size="sm" is-outline @click="openEditMode()">
-              {{
-                isMobile
-                  ? $t("pages.account.addresses.add_new_address_button_mobile")
-                  : $t("pages.account.addresses.add_new_address_button")
-              }}
+            <VcButton
+              v-if="!editingMode && paginatedAddresses.length"
+              class="px-3 uppercase"
+              size="sm"
+              is-outline
+              @click="openEditMode()"
+            >
+              <span class="sm:hidden">{{ $t("pages.account.addresses.add_new_address_button_mobile") }}</span>
+              <span class="hidden sm:inline">{{ $t("pages.account.addresses.add_new_address_button") }}</span>
             </VcButton>
           </div>
 
-          <div class="flex flex-col bg-white shadow-sm" :class="{ 'rounded border': !isMobile }">
+          <!-- Empty view -->
+          <VcEmptyView
+            :text="$t('pages.account.addresses.no_addresses_message')"
+            v-if="!paginatedAddresses.length && !editingMode"
+          >
+            <template #icon>
+              <VcImage
+                src="/static/images/account/icons/no-addresses.svg"
+                :alt="$t('pages.account.addresses.addresses_icon')"
+              />
+            </template>
+            <template #button>
+              <VcButton class="px-6 uppercase" size="lg" @click="openEditMode">
+                <i class="fa fa-plus text-inherit -ml-0.5 mr-2.5" />
+                {{ $t("pages.account.addresses.add_new_address_button") }}
+              </VcButton>
+            </template>
+          </VcEmptyView>
+
+          <div class="flex flex-col bg-white shadow-sm md:rounded md:border" v-else>
             <AddressForm
               v-if="editingMode"
               :model-value="editableAddress"
@@ -36,7 +63,6 @@
                 <div class="flex space-x-4 pb-3 pt-7 sm:pb-4 sm:pt-4 sm:float-right">
                   <VcButton
                     kind="secondary"
-                    :size="isMobile ? 'md' : 'lg'"
                     :is-disabled="saveAddressLoading"
                     class="uppercase w-32 sm:w-auto sm:px-12"
                     is-outline
@@ -46,7 +72,6 @@
                   </VcButton>
 
                   <VcButton
-                    :size="isMobile ? 'md' : 'lg'"
                     :is-disabled="!dirty"
                     :is-waiting="saveAddressLoading"
                     class="uppercase flex-grow sm:flex-none sm:px-16"
@@ -65,6 +90,7 @@
             <!-- View Table -->
             <template v-else>
               <VcTable
+                v-if="paginatedAddresses.length"
                 :loading="addressesLoading"
                 :item-action-builder="actionBuilder"
                 :columns="columns"
@@ -101,21 +127,6 @@
                     <div class="flex flex-col">
                       <span class="text-sm text-gray-400" v-t="'pages.account.addresses.email_label'"></span>
                       <span class="overflow-hidden overflow-ellipsis">{{ itemData.item.email }}</span>
-                    </div>
-                  </div>
-                </template>
-                <template #mobile-empty>
-                  <div class="flex items-center justify-center space-x-10 p-5">
-                    <img
-                      src="/static/images/account/icons/no-addresses.svg"
-                      :alt="$t('pages.account.addresses.no_addresses_img_alt')"
-                    />
-                    <div class="flex flex-col space-y-2">
-                      <span class="text-base" v-t="'pages.account.addresses.no_addresses_message'"></span>
-
-                      <VcButton class="uppercase w-full" @click="openEditMode()">
-                        {{ $t("pages.account.addresses.add_new_address_button") }}
-                      </VcButton>
                     </div>
                   </div>
                 </template>
@@ -175,33 +186,7 @@
                     </td>
                   </tr>
                 </template>
-                <template #desktop-empty>
-                  <!-- Workaround for using colspan -->
-                  <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                  </tr>
-                  <tr>
-                    <td colspan="6" class="polygons-bg">
-                      <div class="flex items-center pl-56 space-x-10 h-80">
-                        <img
-                          src="/static/images/account/icons/no-addresses.svg"
-                          :alt="$t('pages.account.addresses.no_addresses_img_alt')"
-                        />
-                        <div class="flex flex-col space-y-2">
-                          <span class="text-base" v-t="'pages.account.addresses.no_addresses_message'"></span>
 
-                          <VcButton class="uppercase w-full" @click="openEditMode()">
-                            {{ $t("pages.account.addresses.add_new_address_button") }}
-                          </VcButton>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </template>
                 <template #desktop-skeleton>
                   <tr v-for="i of itemsPerPage" :key="i" class="even:bg-gray-50">
                     <td class="p-5">
@@ -231,13 +216,14 @@
 </template>
 
 <script setup lang="ts">
-import { ITableColumn, VcButton, VcTable } from "@/components";
+import { ITableColumn, VcButton, VcTable, VcEmptyView, VcImage } from "@/components";
 import { AccountNavigation, AddressForm, useUser, useUserAddresses } from "@/shared/account";
 import { computed, ComputedRef, onMounted, Ref, ref } from "vue";
 import { clone } from "lodash";
 import { MemberAddressType } from "@/core/api/graphql/types";
 import { sortAscending, sortDescending } from "@/core/constants";
 import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
+import { BackButtonInHeader } from "@/shared/layout";
 import { useCountries } from "@core/composables";
 import { AddressType } from "@core/types";
 import { useI18n } from "vue-i18n";
@@ -258,7 +244,7 @@ const {
   addOrUpdateAddresses,
 } = useUserAddresses({ user });
 
-const isMobile = breakpoints.smaller("md");
+const isMobile = breakpoints.smaller("lg");
 const editingMode: Ref<boolean> = ref(false);
 const editableAddress: Ref<MemberAddressType | null> = ref(null);
 const page = ref(1);

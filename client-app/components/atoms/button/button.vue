@@ -30,13 +30,13 @@ import { eagerComputed } from "@vueuse/core";
 
 const props = defineProps({
   kind: {
-    type: String,
+    type: String as PropType<"primary" | "secondary" | "success" | "warning" | "danger">,
     default: "primary",
     validator: (value: string) => ["primary", "secondary", "success", "warning", "danger"].includes(value),
   },
 
   size: {
-    type: String,
+    type: String as PropType<"sm" | "md" | "lg">,
     default: "md",
     validator: (value: string) => ["sm", "md", "lg"].includes(value),
   },
@@ -74,8 +74,8 @@ const props = defineProps({
 
 defineEmits(["click"]);
 
-const isEnabled = eagerComputed(() => !props.isDisabled && !props.isWaiting);
-const isLink = eagerComputed(() => !!props.to && isEnabled.value);
+const isEnabled = eagerComputed<boolean>(() => !props.isDisabled && !props.isWaiting);
+const isLink = eagerComputed<boolean>(() => !!props.to && isEnabled.value);
 </script>
 
 <style scoped lang="scss">
@@ -107,14 +107,14 @@ $colors: primary, secondary, success, warning, danger;
   &--disabled {
     @apply bg-gray-200 text-gray-400 cursor-not-allowed #{!important};
 
-    --tw-bg-opacity: 0.7 !important;
-    --tw-text-opacity: 0.7 !important;
+    --tw-bg-opacity: 0.7;
+    --tw-text-opacity: 0.7;
 
     &#{$self}--outline {
       @apply bg-transparent border-gray-300 #{!important};
 
-      --tw-text-opacity: 0.7 !important;
-      --tw-border-opacity: 0.8 !important;
+      --tw-text-opacity: 0.7;
+      --tw-border-opacity: 0.8;
     }
   }
 

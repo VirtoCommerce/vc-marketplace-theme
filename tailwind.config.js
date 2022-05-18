@@ -10,6 +10,11 @@ module.exports = {
 
     extend: {
       colors: {
+        yellow: {
+          // TODO: delete when switching all components to the "primary" and "secondary" colors
+          500: "#205527",
+        },
+
         // Generated with https://www.tailwindshades.com/
         primary: {
           DEFAULT: '#205527',
