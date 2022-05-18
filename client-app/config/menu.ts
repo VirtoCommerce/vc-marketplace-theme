@@ -1,11 +1,31 @@
 export default {
   header: {
     main: [
-      { id: "home", title: "Home", url: "/" },
-      { id: "all-products-menu", title: "Our assortment" },
-      { id: "bulk", title: "Bulk order", url: "/bulk-order" },
-      { id: "checkout", title: "Cart", url: "/checkout" },
-      { id: "contact", title: "Contact", url: "/contact" },
+      {
+        id: "home",
+        route: "/",
+        title: "shared.layout.header.menu.home",
+      },
+      {
+        id: "all-products-menu",
+        route: { name: "Catalog" },
+        title: "shared.layout.header.menu.all_products",
+      },
+      {
+        id: "bulk-order",
+        route: { name: "BulkOrder" },
+        title: "shared.layout.header.menu.bulk",
+      },
+      {
+        id: "checkout",
+        route: { name: "Checkout" },
+        title: "shared.layout.header.menu.cart",
+      },
+      {
+        id: "contact",
+        route: "/contact",
+        title: "shared.layout.header.menu.contact_us",
+      },
     ],
   },
   footer: [],

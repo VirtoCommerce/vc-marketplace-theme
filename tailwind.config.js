@@ -1,3 +1,5 @@
+const colors = require("tailwindcss/colors");
+
 module.exports = {
   content: ["./index.html", "./client-app/**/*.{vue,js,ts,jsx,tsx}"],
 
@@ -10,19 +12,24 @@ module.exports = {
 
     extend: {
       colors: {
+        yellow: {
+          // TODO: delete when switching all components to the "primary" and "secondary" colors
+          500: "#F0AD4E",
+        },
+
         // Generated with https://www.tailwindshades.com/
         primary: {
-          DEFAULT: '#205527',
-          '50': '#67C673',
-          '100': '#58C066',
-          '200': '#41AE50',
-          '300': '#369042',
-          '400': '#2B7335',
-          '500': '#205527',
-          '600': '#112C14',
-          '700': '#010302',
-          '800': '#000000',
-          '900': '#000000',
+          DEFAULT: "#F0AD4E",
+          50: "#FEFBF7",
+          100: "#FDF3E4",
+          200: "#FAE1BF",
+          300: "#F6D099",
+          400: "#F3BE74",
+          500: "#F0AD4E",
+          600: "#EC951A",
+          700: "#BE7610",
+          800: "#8A560C",
+          900: "#563607",
         },
 
         secondary: {
@@ -114,6 +121,12 @@ module.exports = {
           700: "#D90000",
           800: "#A10000",
           900: "#690000",
+        },
+
+        cyan: {
+          // TODO: delete when switching all links elements to the "link" color
+          500: "#5294AD",
+          700: "#00739E",
         },
       },
     },

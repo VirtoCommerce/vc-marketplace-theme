@@ -1,10 +1,10 @@
-Description: 
+Description:
 
 
 --
 
-QA-test: 
+QA-test:
 
-Demo-test: 
+Demo-test:
 
-Download artifact URL: 
+Download artifact URL:

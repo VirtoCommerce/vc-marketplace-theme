@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-gray-100 pt-7 pb-16 shadow-inner">
+  <div class="bg-gray-100 grow pt-6 pb-16 shadow-inner">
+    <BackButtonInHeader v-if="isMobile" @click="$router.back()" />
+
     <div class="w-full max-w-screen-2xl mx-auto pb-5 px-5 md:px-12">
       <VcBreadcrumbs :items="breadcrumbs"></VcBreadcrumbs>
     </div>
@@ -74,7 +76,7 @@
             :is-collapsible="true"
             class="mb-5"
           >
-            <div class="flex flex-col text-sm">
+            <div class="flex flex-col space-y-1.5 text-sm">
               <span class="font-extrabold">{{ deliveryAddress?.firstName }} {{ deliveryAddress?.lastName }}</span>
               <p>
                 {{ deliveryAddress?.countryCode }}
@@ -104,7 +106,7 @@
             class="mb-5"
           >
             <div class="flex items-center space-x-4 text-sm">
-              <VcImage src="/static/images/checkout/fedex.svg" class="h-12 w-12" />
+              <VcImage src="/static/images/checkout/fedex.svg" class="h-12 w-12" lazy />
               <span
                 >{{ order?.shipments?.[0]?.shipmentMethodCode }} {{ order?.shipments?.[0]?.shipmentMethodOption }} ({{
                   order?.shipments?.[0]?.price?.formattedAmount
@@ -125,14 +127,14 @@
                 }}</span>
                 {{ order?.inPayments?.[0]?.number }}
               </p>
-              <p>
+              <p class="overflow-x-hidden break-words">
                 <span class="font-extrabold">{{
                   $t("pages.account.order_details.payment_details_card.payment_type_label")
                 }}</span>
                 {{ order?.inPayments?.[0]?.gatewayCode }}
               </p>
               <div class="mt-3">
-                <VcButton class="px-2 py-1 uppercase text-xs" size="xs" is-outline :is-disabled="true">
+                <VcButton class="px-2 py-1 uppercase !text-xs !h-auto" is-outline :is-disabled="true">
                   {{ $t("pages.account.order_details.payment_details_card.view_invoice_button") }}
                 </VcButton>
               </div>
@@ -144,7 +146,7 @@
             :is-collapsible="true"
             class="mb-5"
           >
-            <div class="flex flex-col text-sm">
+            <div class="flex flex-col space-y-1.5 text-sm">
               <span class="font-extrabold">{{ billingAddress?.firstName }} {{ billingAddress?.lastName }}</span>
               <p>
                 {{ billingAddress?.countryCode }}
@@ -178,6 +180,8 @@ import { OrderSummary, ProductCard, AcceptedGifts } from "@/shared/checkout";
 import { computed, onMounted, ref } from "vue";
 import { VcCard, VcImage, VcPagination, VcButton, VcSection, VcBreadcrumbs, IBreadcrumbs } from "@/components";
 import { useRoute } from "vue-router";
+import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
+import { BackButtonInHeader } from "@/shared/layout";
 import { ReorderInfo, useUserOrder } from "@/shared/account";
 import moment from "moment";
 import _ from "lodash";
@@ -185,15 +189,15 @@ import { usePopup } from "@/shared/popup";
 import { useProducts } from "@/shared/catalog";
 import { useI18n } from "vue-i18n";
 
-const { t } = useI18n();
-
+const breakpoints = useBreakpoints(breakpointsTailwind);
 const { itemsPerPage, pages, order, deliveryAddress, billingAddress, loadOrder } = useUserOrder();
 const { fetchProducts, products } = useProducts();
 const { openPopup } = usePopup();
-
+const { t } = useI18n();
 const route = useRoute();
-const orderId = ref(route.params.id as string);
 
+const isMobile = breakpoints.smaller("lg");
+const orderId = ref(route.params.id as string);
 const page = ref(1);
 const orderItems = computed(() =>
   order.value?.items
@@ -229,7 +233,7 @@ const openReorderPopup = async () => {
 };
 
 onMounted(async () => {
-  await loadOrder(orderId.value);
+  await loadOrder({ id: orderId.value });
   breadcrumbs.value.push({ title: `${order.value?.number}`, route: `/account/order-details/${order.value?.id}` });
 });
 </script>

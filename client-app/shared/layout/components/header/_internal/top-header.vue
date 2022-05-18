@@ -1,7 +1,12 @@
 <template>
   <div
-    class="h-12 px-12 flex items-center justify-end bg-[color:var(--color-header-top-bg)] font-bold text-sm text-[color:var(--color-header-top-text)]"
+    class="h-12 px-12 flex items-center justify-between bg-[color:var(--color-header-top-bg)] font-bold text-sm text-[color:var(--color-header-top-text)]"
   >
+    <div class="flex space-x-8 items-center">
+      <LanguageSelector v-if="$context.availLanguages && $context.availLanguages.length > 1" />
+      <CurrencySelector v-if="$context.availCurrencies && $context.availCurrencies.length > 1" />
+    </div>
+
     <!-- Authorized menu items -->
     <div v-if="isAuthenticated" class="flex items-center">
       <TopHeaderLink to="/account/dashboard" v-t="'shared.layout.header.top_header.link_dashboard'"></TopHeaderLink>
@@ -50,7 +55,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
+import { CurrencySelector, LanguageSelector } from "@/shared/layout";
 import { useUser } from "@/shared/account";
+
 import TopHeaderLink from "./top-header-link.vue";
 
 const { isAuthenticated, me, signMeOut } = useUser();
