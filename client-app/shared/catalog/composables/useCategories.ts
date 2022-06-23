@@ -1,47 +1,51 @@
 import { computed, readonly, Ref, ref } from "vue";
-import { searchCategories } from "@core/api/graphql/catalog";
-import { Category } from "@core/api/graphql/types";
-import { Logger } from "@core/utilities";
+import { searchCategories } from "@/xapi/graphql/catalog";
+import { Category } from "@/xapi/types";
+import { Logger } from "@/core/utilities";
 import { CategoryTree } from "../types";
+import globals from "@/core/globals";
 
-const categoryTree: Ref<CategoryTree> = ref({});
+const categoryTree: Ref<CategoryTree | undefined> = ref();
 const loading: Ref<boolean> = ref(true);
-const selectedCategory: Ref<CategoryTree | undefined> = ref();
 
-const itemToTree = (category: Category, isCurrent: boolean): CategoryTree => {
+const itemToTreeItem = (parent: CategoryTree, category: Category): CategoryTree => {
   return {
+    isRoot: false,
     id: category.id,
-    parent: category.parent?.id ?? "",
+    parent: parent,
+    parentId: category.parent?.id ?? "",
     label: category.name ?? "",
     slug: category.slug ?? "",
     items: [],
-    isCurrent,
     seoUrl: category.seoInfo?.semanticUrl ?? "",
+    breadcrumbs: category.breadcrumbs,
   };
 };
 
-const buildCategoryTree = (parent: CategoryTree, allCats: Category[], activeCatId: string): CategoryTree => {
-  //TODO: replace to loop instead of recursion
+const buildCategoryTree = (parent: CategoryTree, allCats: Category[]): CategoryTree => {
   parent.items = allCats
-    .filter((c) => c.id !== parent.id && c.parent?.id === parent.id)
-    // .sort((a, b) => (a.outline ?? "").localeCompare(b.outline ?? ""))
+    .filter((categoryItem) => categoryItem.id !== parent.id && categoryItem.parent?.id === parent.id)
     .map((c) => {
-      return buildCategoryTree(itemToTree(c, activeCatId === c.id), allCats, activeCatId);
+      return buildCategoryTree(itemToTreeItem(parent, c), allCats);
     });
 
   return parent;
 };
 
-function searchCategory(categoryTreeItem: CategoryTree, seoUrl: string): CategoryTree | undefined {
+function searchCategoryByKey(
+  categoryTreeItem: CategoryTree,
+  key: keyof CategoryTree,
+  value: any
+): CategoryTree | undefined {
   const items = categoryTreeItem.items ?? [];
-  let category = items.find((item) => item.seoUrl === seoUrl);
+  let category = items.find((item) => item[key] === value);
 
   if (category) {
     return category;
   }
 
   for (const item of items) {
-    category = searchCategory(item, seoUrl);
+    category = searchCategoryByKey(item, key, value);
 
     if (category) {
       break;
@@ -51,17 +55,21 @@ function searchCategory(categoryTreeItem: CategoryTree, seoUrl: string): Categor
   return category;
 }
 
-function selectCategoryBySeoUrl(seoUrl?: string) {
-  selectedCategory.value = seoUrl ? searchCategory(categoryTree.value, seoUrl) : undefined;
-}
-
-async function loadCategoriesTree(activeCatId: string) {
+async function loadCategoriesTree() {
   const MAX_CATEGORIES = 100;
   loading.value = true;
 
+  const rootCategoryInitialValue: CategoryTree = {
+    isRoot: true,
+    label: globals.i18n.global.t("common.labels.catalog"),
+    items: [],
+    slug: "catalog",
+    breadcrumbs: [],
+  };
+
   try {
     const { items = [] } = await searchCategories(MAX_CATEGORIES, 1);
-    categoryTree.value = buildCategoryTree({}, items, activeCatId);
+    categoryTree.value = buildCategoryTree(rootCategoryInitialValue, items);
   } catch (e) {
     Logger.error("useCategories.loadCategoriesTree", e);
     throw e;
@@ -70,10 +78,23 @@ async function loadCategoriesTree(activeCatId: string) {
   }
 }
 
-export default () => ({
-  selectCategoryBySeoUrl,
-  loadCategoriesTree,
-  loading: readonly(loading),
-  categoryTree: computed(() => categoryTree.value),
-  selectedCategory: computed(() => selectedCategory.value),
-});
+export default () => {
+  const selectedCategory: Ref<CategoryTree | undefined> = ref();
+
+  function selectCategoryByKey(key: keyof CategoryTree, value: any) {
+    selectedCategory.value = value ? searchCategoryByKey(categoryTree.value!, key, value) : undefined;
+  }
+
+  function selectRoot() {
+    selectedCategory.value = categoryTree.value;
+  }
+
+  return {
+    selectRoot,
+    selectCategoryByKey,
+    loadCategoriesTree,
+    loading: readonly(loading),
+    categoryTree: computed(() => categoryTree.value),
+    selectedCategory: computed(() => selectedCategory.value),
+  };
+};

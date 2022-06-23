@@ -1,3 +1,8 @@
+export function getBaseUrl(supportedLocales: string[]): string {
+  const localeInPath = location.pathname.split("/")[1];
+  return supportedLocales.includes(localeInPath) ? `/${localeInPath}/` : "";
+}
+
 export function sleep(ms: number, resolvedValue?: any): Promise<any> {
   return new Promise((resolve) => setTimeout(resolve, ms, resolvedValue));
 }
@@ -45,4 +50,8 @@ export function dateToIsoDateString(date: Date | undefined) {
 
 export function nameOf<T>(key: keyof T, _instance?: T): keyof T {
   return key;
+}
+
+export function stringFormat(template: string, ...args: string[]): string {
+  return template.replace(/{(\d+)}/g, (match: string, num: number) => args[num] || match);
 }

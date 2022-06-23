@@ -4,14 +4,16 @@
   >
     <header class="px-6 flex justify-between items-center h-14 flex-shrink-0">
       <router-link to="/" @click="$emit('close')">
-        <VcImage :src="$cfg.logo_inverted_image" class="h-9" lazy />
+        <VcImage src="/static/images/common/logo-white.svg" class="h-9" lazy />
       </router-link>
 
       <!-- Language block -->
-      <LanguageSelector v-if="$context.availLanguages && $context.availLanguages.length > 1" />
+      <LanguageSelector v-if="supportedLocales.length > 1" class="sm:ml-auto sm:mr-6" />
 
       <button class="appearance-none py-2 px-4 -mr-4" @click="$emit('close')">
-        <i class="fas fa-times text-2xl text-[color:var(--color-primary)]" />
+        <svg class="text-[color:var(--color-primary)]" height="20" width="20">
+          <use href="/static/images/close.svg#main" />
+        </svg>
       </button>
     </header>
 
@@ -42,8 +44,8 @@
             <template #icon="{ isActive }" v-if="openedItem?.id === 'all-products-menu'">
               <svg
                 :class="['shrink-0 scale-150 ml-0.5 mr-3.5', { 'text-[color:var(--color-primary)]': isActive }]"
-                height="20"
-                width="20"
+                height="36"
+                width="36"
               >
                 <use href="/static/images/common/cube.svg#main" />
               </svg>
@@ -51,8 +53,8 @@
 
             <!-- Logout -->
             <div v-if="childrenItem.id === 'logout'" class="flex items-center">
-              <template v-if="me.contact?.fullName">
-                <span>{{ me.contact.fullName }}</span>
+              <template v-if="user.contact?.fullName">
+                <span>{{ user.contact.fullName }}</span>
                 <span class="font-normal text-base mx-2.5">•</span>
               </template>
 
@@ -71,14 +73,16 @@
               </h2>
 
               <VcRadioButton
-                v-for="currencyItem in $context.availCurrencies"
-                :model-value="currentCurrency.code"
+                v-for="currencyItem in supportedCurrencies"
+                :model-value="currentCurrency?.code"
                 :key="currencyItem.code"
                 :value="currencyItem.code"
                 class="py-2.5"
-                @click="currentCurrency.code === currencyItem.code ? null : setCurrencyByCode(currencyItem.code)"
+                @click="
+                  currentCurrency?.code === currencyItem.code ? null : saveCurrencyCodeAndReload(currencyItem.code)
+                "
               >
-                <span :class="{ 'text-white': currentCurrency.code === currencyItem.code }" class="uppercase">
+                <span :class="{ 'text-white': currentCurrency?.code === currencyItem.code }" class="uppercase">
                   {{ currencyItem.code }}
                 </span>
               </VcRadioButton>
@@ -91,7 +95,7 @@
 
     <!-- region Main menu section -->
     <section v-else class="flex-grow overflow-y-auto pb-16 divide-y divide-white divide-opacity-20">
-      <div class="flex flex-col space-y-8 py-8 px-10">
+      <div class="flex flex-col space-y-5 mt-2 py-8 px-9">
         <MobileMenuLink
           v-for="item in mainMenuLinks"
           :key="item.title"
@@ -99,7 +103,7 @@
           :icon="item.icon"
           :title="item.title"
           :is-parent="!!item.children?.length"
-          class="uppercase text-xl font-bold"
+          class="text-2xl"
           @close="$emit('close')"
           @select="selectMenuItem(item)"
         >
@@ -131,12 +135,13 @@
         </MobileMenuLink>
       </div>
 
-      <div class="flex flex-col space-y-8 py-8 px-10">
+      <div class="flex flex-col space-y-5 py-8 px-9">
         <template v-if="isAuthenticated">
           <!-- My account link -->
           <MobileMenuLink
             :title="accountMenuLink.title"
-            class="uppercase text-xl font-bold"
+            icon="/static/images/common/user-circle.svg#main"
+            class="text-2xl"
             is-parent
             @select="selectMenuItem(accountMenuLink)"
           />
@@ -145,6 +150,7 @@
           TODO: Will be used in future. Commented due to acceptance criteria
           <MobileMenuLink
             :title="corporateMenuLink.title"
+            icon="/static/images/dashboard/icons/contact.svg#main"
             class="uppercase text-xl font-bold"
             is-parent
             @select="selectMenuItem(corporateMenuLink)"
@@ -165,8 +171,9 @@
 
         <!-- Settings link -->
         <MobileMenuLink
-          v-if="$context.availCurrencies && $context.availCurrencies.length > 1"
-          class="uppercase text-xl font-bold"
+          v-if="supportedCurrencies.length > 1"
+          class="text-2xl"
+          icon="/static/images/common/settings.svg#main"
           is-parent
           @select="selectMenuItem(settingsMenuLink)"
         >
@@ -182,12 +189,11 @@
 import { computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { VcImage, VcRadioButton } from "@/components";
 import { useCart } from "@/shared/cart";
 import { useUser } from "@/shared/account";
 import { LanguageSelector, MenuLink, useNavigations } from "@/shared/layout";
 import { useCompareProducts } from "@/shared/compare";
-import { useCurrency } from "@core/composables";
+import { useCurrency, useLanguages } from "@/core/composables";
 import MobileMenuLink from "./mobile-menu-link.vue";
 
 defineEmits(["close"]);
@@ -196,8 +202,9 @@ const route = useRoute();
 const { t } = useI18n();
 const { cart } = useCart();
 const { productsIds } = useCompareProducts();
-const { currentCurrency, setCurrencyByCode } = useCurrency();
-const { me, isAuthenticated, signMeOut } = useUser();
+const { supportedLocales } = useLanguages();
+const { currentCurrency, supportedCurrencies, saveCurrencyCodeAndReload } = useCurrency();
+const { user, isAuthenticated, signMeOut } = useUser();
 const { mainMenuLinks, openedItem, selectMenuItem, goBack, goMainMenu } = useNavigations();
 
 const unauthorizedMenuLinks: MenuLink[] = [

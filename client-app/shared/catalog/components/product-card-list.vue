@@ -2,7 +2,7 @@
   <div class="flex items-center justify-between bg-white rounded border p-4 shadow-sm hover:shadow-lg space-x-6">
     <div class="flex flex-grow items-center">
       <!-- Product image -->
-      <router-link :to="`/${SeoUrl.Product}/${product.id}`" class="cursor-pointer">
+      <router-link :to="link" class="cursor-pointer">
         <div class="border border-gray-100 w-20 h-20 flex-shrink-0 mr-4">
           <VcImage
             :src="product.imgSrc"
@@ -17,7 +17,7 @@
       <div>
         <!-- Product title -->
         <router-link
-          :to="`/${SeoUrl.Product}/${product.id}`"
+          :to="link"
           class="text-[color:var(--color-link)] font-extrabold text-sm mb-3 flex-grow line-clamp-2 overflow-hidden"
         >
           {{ product.name }}
@@ -43,14 +43,11 @@
       <div class="flex-shrink-0 w-48">
         <slot name="cart-handler"></slot>
 
-        <div v-if="product.availabilityData?.isInStock" class="flex items-center text-green-700 text-xs mt-3">
-          <div class="w-1.5 h-1.5 bg-green-700 rounded mr-1"></div>
-          {{ product.availabilityData.availableQuantity > 9999 ? "9999+" : product.availabilityData.availableQuantity }}
-          {{ $t("common.suffixes.product_count_in_stock") }}
-        </div>
-        <div v-else class="flex items-center text-[color:var(--color-danger)] text-xs mt-3">
-          <div class="w-1.5 h-1.5 bg-[color:var(--color-danger)] rounded mr-1"></div>
-          {{ $t("common.messages.product_out_of_stock") }}
+        <div class="flex">
+          <VcInStock
+            :is-in-stock="product.availabilityData?.isInStock"
+            :quantity="product.availabilityData?.availableQuantity"
+          ></VcInStock>
         </div>
       </div>
     </div>
@@ -58,16 +55,18 @@
 </template>
 
 <script setup lang="ts">
-import { PropType } from "vue";
-import { VcImage, VcItemPrice } from "@/components";
+import { computed, PropType } from "vue";
 import { AddToCompare } from "@/shared/compare";
-import { Product as ProductType } from "@/core/api/graphql/types";
-import SeoUrl from "@core/seo-routes.enum";
+import { Product } from "@/xapi/types";
+import { RouteLocationRaw } from "vue-router";
+import { getProductRoute } from "@/shared/catalog";
 
-defineProps({
+const props = defineProps({
   product: {
-    type: Object as PropType<ProductType>,
+    type: Object as PropType<Product>,
     required: true,
   },
 });
+
+const link = computed<RouteLocationRaw>(() => getProductRoute(props.product));
 </script>

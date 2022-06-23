@@ -3,17 +3,14 @@
     <!-- Name and image -->
     <div class="relative shrink-0 w-full flex-1 flex space-x-3 items-center">
       <div class="border border-gray-100 w-16 h-16 shrink-0">
-        <VcImage
-          :src="lineItem.product?.imgSrc"
-          :alt="lineItem.name"
-          class="w-full h-full object-cover object-center"
-        />
+        <VcImage :src="product.imgSrc" :alt="product.name" class="w-full h-full object-cover object-center" />
       </div>
+
       <router-link
-        :to="{ name: 'Product', params: { productId: lineItem.product?.id } }"
+        :to="link"
         class="text-sm text-[color:var(--color-link)] hover:text-[color:var(--color-link-hover)] break-words font-extrabold line-clamp-3 overflow-hidden"
       >
-        {{ lineItem.name }}
+        {{ product.name }}
       </router-link>
     </div>
 
@@ -22,32 +19,27 @@
       <span class="font-bold">
         {{ $t("pages.compare.main_block.price_label") }}
       </span>
+
       <div>
-        <VcItemPrice :value="lineItem.product?.price" />
+        <VcItemPrice :value="product.price" />
       </div>
     </div>
 
     <!-- Add to cart -->
     <div class="w-48 shrink-0 flex flex-col justify-center">
-      <AddToCart :product="lineItem.product!" />
-      <div v-if="lineItem.product?.availabilityData?.isInStock" class="flex items-center text-green-700 text-xs">
-        <div class="w-1.5 h-1.5 bg-green-700 rounded mr-1"></div>
-        {{
-          lineItem.product.availabilityData.availableQuantity > 9999
-            ? "9999+"
-            : lineItem.product.availabilityData.availableQuantity
-        }}
-        {{ $t("common.suffixes.product_count_in_stock") }}
-      </div>
+      <AddToCart :product="product" />
 
-      <div v-else class="flex items-center text-[color:var(--color-danger)] text-xs">
-        <div class="w-1.5 h-1.5 bg-[color:var(--color-danger)] rounded mr-1"></div>
-        {{ $t("common.messages.product_out_of_stock") }}
+      <div class="flex">
+        <VcInStock
+          :is-in-stock="product.availabilityData?.isInStock"
+          :quantity="product.availabilityData?.availableQuantity"
+        ></VcInStock>
       </div>
     </div>
 
     <!-- Actions -->
     <div class="shrink-0 ml-auto">
+      <!-- todo: https://virtocommerce.atlassian.net/browse/ST-2256 -->
       <button
         type="button"
         class="h-7 w-7 shadow rounded text-[color:var(--color-danger)] bg-white hover:bg-gray-100"
@@ -61,17 +53,20 @@
 </template>
 
 <script setup lang="ts">
-import { PropType } from "vue";
-import { VcImage, VcItemPrice } from "@/components";
+import { computed, PropType } from "vue";
+import { RouteLocationRaw } from "vue-router";
+import { getProductRoute } from "@/shared/catalog";
 import { AddToCart } from "@/shared/cart";
-import { LineItemType } from "@core/api/graphql/types";
+import { Product } from "@/xapi/types";
 
 defineEmits(["remove"]);
 
-defineProps({
-  lineItem: {
-    type: Object as PropType<LineItemType>,
+const props = defineProps({
+  product: {
+    type: Object as PropType<Product>,
     required: true,
   },
 });
+
+const link = computed<RouteLocationRaw>(() => getProductRoute(props.product));
 </script>

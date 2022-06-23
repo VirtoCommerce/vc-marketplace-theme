@@ -17,7 +17,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./client-app"),
-        "@core": path.resolve(__dirname, "./client-app/core"),
       },
     },
     base: mode === "production" ? "/themes/assets/" : "/",
@@ -25,7 +24,12 @@ export default defineConfig(({ mode }) => {
       outDir: "assets",
       assetsDir: "./",
       emptyOutDir: true,
+      watch: mode === "development" ? {} : null,
       rollupOptions: {
+        input: {
+          index: path.resolve(__dirname, "index.html"),
+          builder: path.resolve(__dirname, "builder-preview.html"),
+        },
         output: {
           entryFileNames: "[name].js",
           assetFileNames: "[name][extname]",

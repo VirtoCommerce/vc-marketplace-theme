@@ -1,15 +1,19 @@
+import { Breadcrumb } from "@/xapi/types";
+
 export * from "./search";
 
-export type CategoryTree = {
+export interface CategoryTree extends Record<string, any> {
+  isRoot: boolean;
   id?: string;
-  parent?: string;
+  parentId?: string;
+  parent?: CategoryTree;
   label?: string;
   slug?: string;
   items?: CategoryTree[];
   isCurrent?: boolean;
-  count?: number;
   seoUrl?: string;
-};
+  breadcrumbs?: Breadcrumb[];
+}
 
 export interface IBreadcrumbsItem {
   title: string;
