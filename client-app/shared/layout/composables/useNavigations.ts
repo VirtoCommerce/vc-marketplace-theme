@@ -1,10 +1,61 @@
-import { computed, inject, shallowRef, triggerRef } from "vue";
-import { menuInjectionKey } from "@core/injection-keys";
+import { computed, shallowRef, triggerRef } from "vue";
 import { MenuLink } from "@/shared/layout";
-import menuSchema from "@/config/menu";
-import { useI18n } from "vue-i18n";
+import { getMenus } from "@/xapi/graphql/common";
+import { MenuLinkType } from "@/xapi/types";
+import globals from "@/core/globals";
+
+const menuLinkLists = shallowRef<Record<string, MenuLinkType[]>>();
+const menuSchema = shallowRef<Record<string, any>>();
 
 const openedMenuLinksStack = shallowRef<MenuLink[]>([]);
+
+function getChildrenItem(childrenItem: MenuLinkType) {
+  return {
+    id: childrenItem.url?.split("/").pop(),
+    title: childrenItem.title,
+    route: childrenItem.url,
+  };
+}
+
+const mainMenuLinks = computed<MenuLink[]>(() =>
+  (menuSchema.value?.header.main || []).map(
+    (item: Record<string, string>) =>
+      ({
+        id: item.id,
+        route: item.route,
+        title: globals.i18n!.global.t(item.title),
+        icon: item.icon,
+        children: (menuLinkLists.value?.[item.id] || []).map((childrenItem) => getChildrenItem(childrenItem)),
+      } as MenuLink)
+  )
+);
+
+const desktopCatalog = computed<MenuLink>(
+  () =>
+    ({
+      id: "all-products-menu",
+      route: {
+        name: "Catalog",
+      },
+      title: globals.i18n!.global.t("shared.layout.header.catalog"),
+      children: (menuLinkLists.value?.["all-products-menu"] || []).map((childrenItem) => getChildrenItem(childrenItem)),
+    } as MenuLink)
+);
+
+async function fetchMenus(cultureName: string) {
+  const results = await getMenus({ cultureName });
+
+  menuLinkLists.value = results.reduce<Record<string, MenuLinkType[]>>((result, menuLinkList) => {
+    result[menuLinkList.name!] = menuLinkList.items!;
+    return result;
+  }, {});
+
+  /**
+   * FIXME: Don't use import
+   * Fetch file (json) from Storefront to be able to edit file in Admin panel
+   */
+  menuSchema.value = await import("../../../../config/menu.json");
+}
 
 function goBack() {
   openedMenuLinksStack.value.pop();
@@ -25,25 +76,13 @@ function selectMenuItem(item: MenuLink) {
 }
 
 export default function useNavigations() {
-  const $menu = inject(menuInjectionKey);
-  const { t } = useI18n();
-
-  const mainMenuLinks: MenuLink[] = menuSchema.header.main.map<MenuLink>((item) => ({
-    id: item.id,
-    route: item.route,
-    title: t(item.title),
-    children: ($menu?.[item.id] || []).map((childrenItem) => ({
-      id: childrenItem.url?.split("/").pop(),
-      title: childrenItem.title,
-      route: childrenItem.url,
-    })),
-  }));
-
   return {
+    fetchMenus,
     goBack,
     goMainMenu,
     selectMenuItem,
-    mainMenuLinks: computed(() => mainMenuLinks),
+    mainMenuLinks,
+    desktopCatalog,
     openedItem: computed<MenuLink | undefined>(() => openedMenuLinksStack.value[openedMenuLinksStack.value.length - 1]),
   };
 }

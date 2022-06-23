@@ -66,7 +66,7 @@
         </VcButton>
 
         <VcButton
-          :is-disabled="!dirty"
+          :is-disabled="!valid"
           :is-waiting="loading"
           @click="addToCart"
           size="lg"
@@ -80,9 +80,8 @@
 </template>
 
 <script setup lang="ts">
-import { VcButton, VcInput } from "@/components";
 import { computed, ref, Ref } from "vue";
-import { InputNewBulkItemType } from "@core/api/graphql/types";
+import { InputNewBulkItemType } from "@/xapi/types";
 import { maxQuantity, validateQuantity } from "@/shared/bulk-order";
 
 type InputNewBulkItemExtendedType = { [prop in keyof InputNewBulkItemType]: string };
@@ -99,6 +98,7 @@ defineProps({
 const items: Ref<InputNewBulkItemExtendedType[]> = ref(createItems(5));
 
 const dirty = computed<boolean>(() => !!items.value.filter((item) => item.productSku || +item.quantity! > 0).length);
+const valid = computed<boolean>(() => !!items.value.filter((item) => item.productSku && +item.quantity! > 0).length);
 
 function createItems(quantity: number): InputNewBulkItemExtendedType[] {
   return Array.from({ length: quantity }).map<InputNewBulkItemExtendedType>(() => ({

@@ -14,7 +14,7 @@
         </div>
         <div class="text-sm">
           <router-link
-            :to="`/${SeoUrl.Product}/${productItem.id}`"
+            :to="link"
             class="text-[color:var(--color-link)] font-extrabold line-clamp-3 overflow-hidden"
             @click="$emit('close-popup')"
           >
@@ -120,7 +120,7 @@
       <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center flex-1">
         <div class="mb-3 lg:mb-0 text-sm xl:w-1/2">
           <router-link
-            :to="`/${SeoUrl.Product}/${productItem.id}`"
+            :to="link"
             class="text-[color:var(--color-link)] font-extrabold line-clamp-3 overflow-hidden"
             @click="$emit('close-popup')"
           >
@@ -174,30 +174,13 @@
               @input="onInput"
               @keypress="onKeypress"
             />
-            <div>
-              <div v-if="!isInputDisabled" class="flex items-center">
-                <span
-                  class="text-xs pt-1 whitespace-nowrap"
-                  :class="
-                    productItem.quantity! > productItem.availabilityData?.availableQuantity
-                      ? 'text-[color:var(--color-primary)]'
-                      : 'text-green-700'
-                  "
-                  >{{
-                    productItem.availabilityData?.availableQuantity > 9999
-                      ? "9999+"
-                      : productItem.availabilityData?.availableQuantity
-                  }}
-                  {{ $t("shared.account.reorder_info_popup.product_card.in_stock_suffix") }}</span
-                >
-              </div>
-              <div v-else-if="isOutOfStock" class="flex items-center">
-                <span
-                  class="text-[color:var(--color-danger)] text-xs pt-1 whitespace-nowrap"
-                  v-t="'shared.account.reorder_info_popup.product_card.out_of_stock_message'"
-                ></span>
-              </div>
-            </div>
+
+            <VcInStock
+              v-if="!isInputDisabled || isOutOfStock"
+              :is-in-stock="!isInputDisabled && !isOutOfStock"
+              :quantity="productItem.availabilityData?.availableQuantity"
+              class="inline-block mt-1.5"
+            ></VcInStock>
           </div>
 
           <div class="hidden md:flex lg:w-28 lg:shrink-0 xl:w-2/4 md:items-end flex-col text-sm font-extrabold pr-3">
@@ -213,14 +196,14 @@
 </template>
 
 <script setup lang="ts">
-import { VcImage } from "@/components";
 import { computed, PropType } from "vue";
 import { useField } from "vee-validate";
 import * as yup from "yup";
-import SeoUrl from "@core/seo-routes.enum";
 import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 import { useCart } from "@/shared/cart";
-import { Product as ProductType } from "@/core/api/graphql/types";
+import { Product } from "@/xapi/types";
+import { RouteLocationRaw } from "vue-router";
+import { getProductRoute } from "@/shared/catalog";
 
 // Define max qty available to add
 const max = 999999;
@@ -228,7 +211,7 @@ const max = 999999;
 const props = defineProps({
   productItem: {
     type: Object as PropType<
-      ProductType & {
+      Product & {
         quantity: number | undefined;
         lineItemId: string | undefined;
       }
@@ -247,6 +230,8 @@ const breakpoints = useBreakpoints(breakpointsTailwind);
 const isMobile = breakpoints.smaller("md");
 
 const { currency } = useCart();
+
+const link = computed<RouteLocationRaw>(() => getProductRoute(props.productItem));
 
 const variation = computed(() => props.productItem.variations?.find((v) => v.id === props.productItem.id));
 const minQty = computed(() => (variation.value ? variation.value?.minQuantity : props.productItem.minQuantity) || 0);
@@ -306,5 +291,3 @@ const onInput = () => {
   }
 };
 </script>
-
-<style scoped></style>

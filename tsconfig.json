@@ -7,6 +7,7 @@
     "moduleResolution": "node",
     "strict": true,
     "jsx": "preserve",
+    "allowJs": true,
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
@@ -15,8 +16,7 @@
     "isolatedModules": true,
     "lib": ["ESNext", "DOM"],
     "paths": {
-      "@/*": ["client-app/*"],
-      "@core/*": ["client-app/core/*"]
+      "@/*": ["client-app/*"]
     }
   },
   "include": [
