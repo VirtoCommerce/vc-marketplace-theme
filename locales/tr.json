@@ -86,7 +86,7 @@
         "link_sign_in": "Sign in",
         "link_register_now": "Sign up now",
         "link_logout": "Log out",
-        "catalog": "Catalogue",
+        "catalog": "Catalog",
         "menu": {
           "bulk": "Bulk order",
           "compare": "Compare",
@@ -550,7 +550,7 @@
         "key_feature_3": "Great value"
       },
       "feature_descriptions_block": {
-        "title": "Commercial management has never been that easy",
+        "title": "Professional purchases have never been that easy",
         "feature_1": "Corporate account management",
         "feature_2": "Quote management and price negotiation",
         "feature_3": "Multiple stores, channels, and locations",
