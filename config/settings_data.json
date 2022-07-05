@@ -15,10 +15,10 @@
       "checkout_coupon_enabled": true,
       "checkout_gifts_enabled": true,
 
-      "logo_image": "/static/images/common/logo.svg",
-      "logo_inverted_image": "/static/images/common/logo-white.svg",
+      "logo_image": "/static/images/common/logo.png",
+      "logo_inverted_image": "/static/images/common/logo.png",
       "favicon_image": "/static/icons/favicon-16x16.png",
-      "homepage_background_image": "/static/images/home/main-banner.webp",
+      "homepage_background_image": "/static/images/home/pivo.jpg",
 
       "image_tools_enabled": true,
 
@@ -47,8 +47,8 @@
         }
       ],
 
-      "color_primary": "#F0AD4E",
-      "color_primary_hover": "#EC951A",
+      "color_primary": "#205527",
+      "color_primary_hover": "#008200",
       "color_secondary": "#151B1E",
       "color_secondary_hover": "#000000",
       "color_link": "#00739E",

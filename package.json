@@ -1,6 +1,6 @@
 {
   "name": "vc-theme-marketplace",
-  "version": "1.3.0-marketplace",
+  "version": "1.3.0-starmarket",
   "private": true,
   "scripts": {
     "postinstall": "husky install",

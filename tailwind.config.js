@@ -1,5 +1,3 @@
-const colors = require("tailwindcss/colors");
-
 module.exports = {
   content: ["./index.html", "./client-app/**/*.{vue,js,ts,jsx,tsx}"],
 
@@ -14,18 +12,18 @@ module.exports = {
       colors: {
         yellow: {
           // TODO: delete when switching all components to the "primary" and "secondary" colors
-          500: "#F0AD4E",
+          500: "#205527",
         },
 
         // Generated with https://www.tailwindshades.com/
         primary: {
-          DEFAULT: "#F0AD4E",
+          DEFAULT: "#205527",
           50: "#FEFBF7",
           100: "#FDF3E4",
           200: "#FAE1BF",
           300: "#F6D099",
           400: "#F3BE74",
-          500: "#F0AD4E",
+          500: "#205527",
           600: "#EC951A",
           700: "#BE7610",
           800: "#8A560C",
@@ -122,12 +120,15 @@ module.exports = {
           800: "#A10000",
           900: "#690000",
         },
-
-        cyan: {
-          // TODO: delete when switching all links elements to the "link" color
-          500: "#5294AD",
-          700: "#00739E",
-        },
+      },
+      boxShadow: {
+        't-sm': '0 -1px 2px 0 rgba(0, 0, 0, 0.05)',
+        't': '0 -1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);',
+        't-md': '0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        't-lg': '0 -10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        't-xl': '0 -20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        't-2xl': '0 -25px 50px -12px rgba(0, 0, 0, 0.25)',
+        't-3xl': '0 -35px 60px -15px rgba(0, 0, 0, 0.3)',
       },
       boxShadow: {
         't-sm': '0 -1px 2px 0 rgba(0, 0, 0, 0.05)',
