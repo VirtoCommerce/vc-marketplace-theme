@@ -107,6 +107,10 @@ module.exports = {
           hover: "#00678d",
         },
 
+        tooltip: {
+          DEFAULT: "#4D4D4D",
+        },
+
         /**
          * Custom colors
          */
@@ -130,13 +134,108 @@ module.exports = {
         },
       },
       boxShadow: {
-        't-sm': '0 -1px 2px 0 rgba(0, 0, 0, 0.05)',
-        't': '0 -1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);',
-        't-md': '0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        't-lg': '0 -10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        't-xl': '0 -20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-        't-2xl': '0 -25px 50px -12px rgba(0, 0, 0, 0.25)',
-        't-3xl': '0 -35px 60px -15px rgba(0, 0, 0, 0.3)',
+        "t-sm": "0 -1px 2px 0 rgba(0, 0, 0, 0.05)",
+        "t-2sm": "1px 2px 4px rgba(0, 0, 0, 0.15)",
+        t: "0 -1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);",
+        "md-x": "1px 2px 8px rgba(0, 0, 0, 0.05)",
+        "t-mds": "1px 1px 3px rgba(0, 0, 0, 0.25)",
+        "t-md": "0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        "t-lgs": "0px -8px 15px rgba(0, 0, 0, 0.1)",
+        "t-lg": "0 -10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+        "t-xl": "0 -20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+        "t-2xl": "0 -25px 50px -12px rgba(0, 0, 0, 0.25)",
+        "t-3xl": "0 -35px 60px -15px rgba(0, 0, 0, 0.3)",
+        "sm-x-y": "1px 2px 9px rgba(0, 0, 0, 0.1)",
+        "sm-x-y-button": "1px 1px 5px rgba(0, 0, 0, 0.15)",
+      },
+      fontSize: {
+        11: [
+          "0.6875rem", //11px
+          {
+            lineHeight: "0.875rem", //14px
+          },
+        ],
+        13: [
+          "0.8125rem", //13px
+          {
+            lineHeight: "1.25rem", //20px
+          },
+        ],
+        "13-title": [
+          "0.8125rem", //13px
+          {
+            lineHeight: "1.25rem", //20px
+            letterSpacing: "0.01em",
+          },
+        ],
+        15: [
+          "0.9375rem", //15px
+          {
+            lineHeight: "1.25rem", //20px
+          },
+        ],
+        17: [
+          "1.0625rem", //17px
+          {
+            lineHeight: "1.25rem", //20px
+          },
+        ],
+        19: [
+          "1.1875rem", //19px
+          {
+            letterSpacing: "0.01em",
+            lineHeight: "1.438rem", //23px
+          },
+        ],
+        21: [
+          "1.3125rem", //21px
+          {
+            letterSpacing: "0.01em",
+            lineHeight: "1.563rem", //25px
+          },
+        ],
+        25: [
+          "1.5625rem", //25px
+          {
+            lineHeight: "1.875rem", //30px
+            letterSpacing: "0.02em",
+          },
+        ],
+        26: [
+          "1.625rem", //26px
+          {
+            lineHeight: "1.875rem", //30px
+          },
+        ],
+        28: [
+          "1.75rem", //28px
+          {
+            letterSpacing: "0.02em",
+            lineHeight: "2.125rem", //34px
+          },
+        ],
+        34: [
+          "2.125rem", //34px
+          {
+            letterSpacing: "0.02em",
+            lineHeight: "2.563rem", //41px
+          },
+        ],
+      },
+      margin: {
+        4.5: "1.125rem", //18px
+      },
+      padding: {
+        4.5: "1.125rem", //18px
+        17: "4.25rem", //68px
+        19: "4.75rem", //76px
+      },
+      width: {
+        70: "17.5rem", //280px
+      },
+      maxHeight: {
+        "screen-60": "60vh",
+        "screen-75": "75vh",
       },
     },
   },

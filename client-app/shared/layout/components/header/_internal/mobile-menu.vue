@@ -3,9 +3,7 @@
     class="fixed z-50 w-full h-screen flex flex-col bg-[color:var(--color-mobile-menu-bg)] text-[color:var(--color-mobile-menu-link)]"
   >
     <header class="px-6 flex justify-between items-center h-14 flex-shrink-0">
-      <router-link to="/" @click="$emit('close')">
-        <VcImage src="/static/images/common/logo-white.svg" class="h-9" lazy />
-      </router-link>
+      <VcImage :src="$cfg.logo_inverted_image" class="h-9" lazy />
 
       <!-- Language block -->
       <LanguageSelector v-if="supportedLocales.length > 1" class="sm:ml-auto sm:mr-6" />
@@ -97,7 +95,7 @@
     <section v-else class="flex-grow overflow-y-auto pb-16 divide-y divide-white divide-opacity-20">
       <div class="flex flex-col space-y-5 mt-2 py-8 px-9">
         <MobileMenuLink
-          v-for="item in mainMenuLinks"
+          v-for="item in mobileHeaderMenuLinks"
           :key="item.title"
           :to="item.route"
           :icon="item.icon"
@@ -137,25 +135,25 @@
 
       <div class="flex flex-col space-y-5 py-8 px-9">
         <template v-if="isAuthenticated">
-          <!-- My account link -->
+          <!-- Account link -->
           <MobileMenuLink
-            :title="accountMenuLink.title"
-            icon="/static/images/common/user-circle.svg#main"
+            v-if="mobileAccountMenuLink"
+            :title="mobileAccountMenuLink.title"
+            :icon="mobileAccountMenuLink.icon"
             class="text-2xl"
             is-parent
-            @select="selectMenuItem(accountMenuLink)"
+            @select="selectMenuItem(mobileAccountMenuLink!)"
           />
 
-          <!-- Corporate link -- >
-          TODO: Will be used in future. Commented due to acceptance criteria
+          <!-- Corporate link -->
           <MobileMenuLink
-            :title="corporateMenuLink.title"
-            icon="/static/images/dashboard/icons/contact.svg#main"
-            class="uppercase text-xl font-bold"
+            v-if="mobileCorporateMenuLink && organization"
+            :title="mobileCorporateMenuLink.title"
+            :icon="mobileCorporateMenuLink.icon"
+            class="text-2xl"
             is-parent
-            @select="selectMenuItem(corporateMenuLink)"
+            @select="selectMenuItem(mobileCorporateMenuLink!)"
           />
-          -->
         </template>
 
         <!-- Unauthorized links -->
@@ -172,8 +170,8 @@
         <!-- Settings link -->
         <MobileMenuLink
           v-if="supportedCurrencies.length > 1"
+          :icon="settingsMenuLink.icon"
           class="text-2xl"
-          icon="/static/images/common/settings.svg#main"
           is-parent
           @select="selectMenuItem(settingsMenuLink)"
         >
@@ -186,8 +184,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useCart } from "@/shared/cart";
 import { useUser } from "@/shared/account";
@@ -198,89 +195,33 @@ import MobileMenuLink from "./mobile-menu-link.vue";
 
 defineEmits(["close"]);
 
-const route = useRoute();
 const { t } = useI18n();
 const { cart } = useCart();
 const { productsIds } = useCompareProducts();
 const { supportedLocales } = useLanguages();
 const { currentCurrency, supportedCurrencies, saveCurrencyCodeAndReload } = useCurrency();
-const { user, isAuthenticated, signMeOut } = useUser();
-const { mainMenuLinks, openedItem, selectMenuItem, goBack, goMainMenu } = useNavigations();
+const { user, isAuthenticated, organization, signMeOut } = useUser();
+const {
+  mobileHeaderMenuLinks,
+  mobileAccountMenuLink,
+  mobileCorporateMenuLink,
+  mobilePreSelectedMenuLink,
+  openedItem,
+  selectMenuItem,
+  goBack,
+  goMainMenu,
+} = useNavigations();
 
 const unauthorizedMenuLinks: MenuLink[] = [
   { route: { name: "SignIn" }, title: t("shared.layout.header.link_sign_in") },
   { route: { name: "SignUp" }, title: t("shared.layout.header.link_register_now") },
 ];
 
-const accountMenuLink: MenuLink = {
-  id: "account",
-  route: { name: "Account" },
-  title: t("shared.layout.header.mobile.my_account"),
-  children: [
-    {
-      route: { name: "Dashboard" },
-      title: t("shared.layout.header.mobile.account_menu.dashboard"),
-      icon: "/static/images/dashboard/icons/dashboard.svg#main",
-    },
-    {
-      route: { name: "Profile" },
-      title: t("shared.layout.header.mobile.account_menu.profile"),
-      icon: "/static/images/dashboard/icons/profile.svg#main",
-    },
-    {
-      route: { name: "Addresses" },
-      title: t("shared.layout.header.mobile.account_menu.addresses"),
-      icon: "/static/images/dashboard/icons/building.svg#main",
-    },
-    {
-      route: { name: "Orders" },
-      title: t("shared.layout.header.mobile.account_menu.orders"),
-      icon: "/static/images/dashboard/icons/orders.svg#main",
-    },
-    {
-      route: { name: "Lists" },
-      title: t("shared.layout.header.mobile.account_menu.your_lists"),
-      icon: "/static/images/dashboard/icons/list.svg#main",
-    },
-    {
-      route: { name: "CheckoutDefaults" },
-      title: t("shared.layout.header.mobile.account_menu.checkout_defaults"),
-      icon: "/static/images/dashboard/icons/check-circle.svg#main",
-    },
-    {
-      id: "logout",
-      icon: "/static/images/common/user-circle.svg#main",
-    },
-  ],
-};
-
-/*
-const corporateMenuLink: MenuLink = {
-  id: "corporate",
-  title: "Corporate",
-  children: [
-    {
-      route: { name: "Company" },
-      title: "Profile",
-      icon: "/static/images/dashboard/icons/company.svg#main",
-    },
-    {
-      route: { name: "CompanyMembers" },
-      title: "Members",
-      icon: "/static/images/dashboard/icons/members.svg#main",
-    },
-  ],
-};
-*/
-
 const settingsMenuLink: MenuLink = {
   id: "settings",
+  icon: "/static/images/common/settings.svg#main",
   children: [{ id: "currency-setting" }], // see implementation in template
 };
-
-const allProductsMenuLink = computed<MenuLink | undefined>(() =>
-  mainMenuLinks.value.find((item) => item.id === "all-products-menu")
-);
 
 async function signOut() {
   await signMeOut();
@@ -288,19 +229,10 @@ async function signOut() {
 }
 
 onMounted(() => {
-  const matchedRouteNames = route.matched.map((item) => item.name);
-  let preSelectedLink: MenuLink | undefined;
-
   goMainMenu();
 
-  if (["Catalog", "Product"].some((item) => matchedRouteNames.includes(item))) {
-    preSelectedLink = allProductsMenuLink.value;
-  } else if (matchedRouteNames.includes("Account") && !matchedRouteNames.includes("Dashboard")) {
-    preSelectedLink = accountMenuLink;
-  }
-
-  if (preSelectedLink) {
-    selectMenuItem(preSelectedLink);
+  if (mobilePreSelectedMenuLink.value) {
+    selectMenuItem(mobilePreSelectedMenuLink.value);
   }
 });
 </script>

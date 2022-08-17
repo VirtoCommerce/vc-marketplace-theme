@@ -1,27 +1,34 @@
 <template>
-  <div class="bg-gray-100 pt-7 pb-16 shadow-inner grow" :class="{ 'polygon-gray-bg': !products.length && !loading }">
-    <div class="max-w-screen-2xl px-5 md:px-12 mx-auto">
+  <div
+    class="bg-gray-100 pt-4 pb-16 shadow-inner grow lg:pt-6"
+    :class="{ 'polygon-gray-bg': !products.length && !loading }"
+  >
+    <div class="max-w-screen-2xl px-5 xl:pl-17 xl:pr-19 mx-auto">
       <!-- Breadcrumbs -->
-      <Breadcrumbs class="mb-2 md:mb-8" :items="breadcrumbs" />
+      <Breadcrumbs class="mb-2.5 md:mb-4" :items="breadcrumbs" />
 
       <div class="flex items-start lg:gap-6">
         <!-- Mobile sidebar back cover -->
         <VcPopupSidebar
           v-if="isMobileSidebar"
           :is-visible="mobileSidebarVisible"
-          class="w-72 px-5 pt-12"
+          class="flex flex-col w-70 px-5 pt-5"
           @hide="hideMobileSidebar()"
         >
-          <div class="relative">
-            <button class="absolute -right-3 appearance-none px-3 py-1" @click="hideMobileSidebar()">
-              <span class="text-2xl fa fa-times text-[color:var(--color-primary)]"></span>
+          <div class="relative mt-0.5 mb-6 pr-6">
+            <div class="font-semibold text-26 pt-1 break-words">
+              {{ $t("common.buttons.filters") }}
+            </div>
+
+            <button class="absolute top-2.5 right-1" @click="hideMobileSidebar()">
+              <svg class="w-5 h-5 text-[color:var(--color-primary)]">
+                <use href="/static/images/delete.svg#main" />
+              </svg>
             </button>
           </div>
 
-          <div class="font-semibold text-2xl pt-1 mb-6">
-            {{ $t("common.buttons.filters") }}
-          </div>
           <ProductsFiltersSidebar
+            class="grow"
             :keyword="keywordQueryParam"
             :filters="mobileFilters"
             :loading="loading || facetsLoading"
@@ -29,29 +36,33 @@
               onSearchStart($event);
               hideMobileSidebar();
             "
-            @change="onMobileFilterChanged($event)"
+            @change="updateMobileFilters($event)"
+            @openBranches="openBranchesDialog(true)"
           />
+
           <div class="sticky h-24 z-100 bottom-0 mt-4 -mx-5 px-5 py-5 shadow-t-md bg-white">
             <div class="flex space-x-4">
               <VcButton
                 class="flex-1 uppercase"
                 size="lg"
                 is-outline
-                :is-disabled="
-                  !(isExistSelectedFacets || filters.inStock || isExistSelectedMobileFacets || mobileFilters.inStock)
-                "
+                :is-disabled="!isExistSelectedFacets && !isExistSelectedMobileFacets"
                 @click="
-                  resetFilters();
+                  resetFacetFilters();
                   hideMobileSidebar();
                 "
               >
                 {{ $t("common.buttons.reset") }}
               </VcButton>
+
               <VcButton
                 class="flex-1 uppercase"
                 size="lg"
                 :is-disabled="!isMobileFilterDirty"
-                @click="applyMobileFiltersAndHideSidebar"
+                @click="
+                  applyFilters(mobileFilters);
+                  hideMobileSidebar();
+                "
               >
                 {{ $t("common.buttons.apply") }}
               </VcButton>
@@ -60,53 +71,55 @@
         </VcPopupSidebar>
 
         <!-- Sidebar -->
-        <div v-else ref="sidebarElement" class="flex flex-col gap-4 lg:gap-5 lg:w-1/4 xl:w-1/5 flex-shrink-0">
-          <CategorySelector :selected-category="selectedCategory" :loading="loading"></CategorySelector>
+        <div v-else class="space-y-5 w-60 flex-shrink-0 pt-2">
+          <CategorySelector :selected-category="selectedCategory" :loading="loading" />
 
           <ProductsFiltersSidebar
             :keyword="keywordQueryParam"
-            :filters="filters"
+            :filters="{ facets, inStock: savedInStock, branches: savedBranches }"
             :loading="loading"
             @search="onSearchStart($event)"
-            @change="onFilterChanged($event)"
+            @change="applyFilters($event)"
           />
         </div>
 
         <!-- Content -->
-        <div class="lg:w-3/4 xl:w-4/5 flex-grow">
-          <h2 class="text-gray-800 text-2xl lg:text-3xl font-bold uppercase">{{ selectedCategory?.label }}</h2>
+        <div class="flex-grow">
+          <div class="flex">
+            <h2 class="text-gray-800 text-21 font-bold uppercase lg:my-px lg:text-25">
+              <span>{{ selectedCategory?.label }}</span>
 
-          <p class="py-3">
-            <span class="font-extrabold">{{ $t("pages.catalog.products_found_message", [total]) }}</span>
-          </p>
+              <sup
+                class="ml-2 normal-case font-normal whitespace-nowrap text-sm lg:text-15 -top-1 lg:-top-[0.5em] text-[color:var(--color-category-page-results)]"
+              >
+                <b class="font-extrabold">{{ total }}</b>
+                {{ $t("pages.catalog.products_found_message", total) }}
+              </sup>
+            </h2>
+          </div>
 
-          <div ref="stickyMobileHeaderAnchor" class="-mb-2"></div>
+          <div class="-mt-px" ref="stickyMobileHeaderAnchor"></div>
 
           <div
-            class="sticky lg:relative top-0 z-10 flex items-center h-14 mt-2 mb-3"
+            class="sticky top-0 z-10 flex items-center h-14 my-1.5 lg:relative lg:justify-end lg:flex-wrap lg:mb-3.5 lg:mt-3 lg:h-auto"
             :class="{
               'z-40 px-5 md:px-12 -mx-5 md:-mx-12 bg-[color:var(--color-header-bottom-bg)]':
                 isVisibleStickyMobileHeader,
             }"
           >
             <!-- Mobile filters toggler -->
-            <div class="lg:hidden mr-3">
-              <VcButton
-                class="px-4 font-extrabold"
-                size="md"
-                @click="showMobileSidebar"
-                :is-disabled="loading || loadingMore"
-              >
-                <i class="fas fa-filter mr-1"></i> {{ $t("pages.catalog.filters_button") }}
+            <div class="lg:hidden mr-2.5">
+              <VcButton class="pl-2.5 pr-2 !text-15 font-bold !font-lato" size="md" @click="showMobileSidebar">
+                <i class="fas fa-filter mr-2"></i> {{ $t("pages.catalog.filters_button") }}
               </VcButton>
             </div>
 
-            <!-- View options -->
-            <ViewMode v-model:mode="viewMode" class="hidden md:inline-flex mr-6" />
-
             <!-- Sorting -->
-            <div class="flex items-center flex-grow md:flex-grow-0 z-10 ml-auto">
-              <span class="hidden lg:block shrink-0 mr-2" v-t="'pages.catalog.sort_by_label'"></span>
+            <div class="flex items-center flex-grow z-10 ml-auto lg:ml-4 lg:flex-grow-0 lg:order-4 xl:ml-8">
+              <span
+                class="hidden lg:block shrink-0 mr-2 text-15 font-bold text-[color:var(--color-category-page-label)]"
+                v-t="'pages.catalog.sort_by_label'"
+              />
 
               <VcSelect
                 v-model="sortQueryParam"
@@ -114,26 +127,64 @@
                 value-field="id"
                 :is-disabled="loading"
                 :items="PRODUCT_SORTING_LIST"
-                class="w-full md:w-52 lg:w-64"
+                class="w-full lg:w-48"
               />
             </div>
+
+            <!-- View options -->
+            <ViewMode
+              v-if="!isMobileSidebar"
+              v-model:mode="savedViewMode"
+              class="inline-flex ml-3 lg:order-1 lg:ml-0 lg:mr-auto"
+            />
+
+            <!-- Branch availability -->
+            <button v-if="!isMobileSidebar" class="order-3 ml-4 xl:ml-6" @click.prevent="openBranchesDialog(false)">
+              <VcCheckbox :model-value="!!savedBranches.length" :disabled="loading">
+                <i18n-t
+                  keypath="pages.catalog.branch_availability_filter_card.available_in"
+                  tag="div"
+                  class="text-15"
+                  :class="{
+                    'text-[color:var(--color-category-page-checkbox-label)]': !savedBranches.length,
+                  }"
+                  scope="global"
+                >
+                  <span :class="{ 'font-bold text-[color:var(--color-link)]': savedBranches.length }">
+                    {{ $t("pages.catalog.branch_availability_filter_card.branches", { n: savedBranches.length }) }}
+                  </span>
+                </i18n-t>
+              </VcCheckbox>
+            </button>
+
+            <!-- In Stock -->
+            <VcCheckbox v-if="!isMobileSidebar" class="order-2 ml-4 xl:ml-8" v-model="savedInStock" :disabled="loading">
+              <span
+                class="text-15 whitespace-nowrap"
+                :class="{
+                  'text-[color:var(--color-category-page-checkbox-label)]': !savedInStock,
+                }"
+              >
+                {{ $t("pages.catalog.instock_filter_card.checkbox_label_desktop") }}
+              </span>
+            </VcCheckbox>
           </div>
 
           <!-- Filters chips -->
-          <div v-if="isExistSelectedFacets || filters.inStock" class="flex flex-wrap gap-x-3 gap-y-2 pb-6">
+          <div v-if="isExistSelectedFacets" class="flex flex-wrap gap-x-3 gap-y-2 pb-6">
             <VcChip
               class="[--color-primary:#292D3B] [--color-primary-hover:#12141A]"
               size="sm"
               is-outline
               clickable
               closable
-              @click="resetFilters"
-              @close="resetFilters"
+              @click="resetFacetFilters"
+              @close="resetFacetFilters"
             >
               {{ $t("pages.catalog.reset_filters_button") }}
             </VcChip>
 
-            <template v-for="facet in filters.facets">
+            <template v-for="facet in facets">
               <template v-for="filterItem in facet.values">
                 <VcChip
                   v-if="filterItem.selected"
@@ -142,7 +193,7 @@
                   size="sm"
                   closable
                   @close="
-                    removeFilterItem({
+                    removeFacetFilterItem({
                       paramName: facet.paramName,
                       value: filterItem.value,
                     })
@@ -152,31 +203,17 @@
                 </VcChip>
               </template>
             </template>
-
-            <template v-if="filters.inStock">
-              <VcChip
-                class="[--color-primary:#292D3B] [--color-primary-hover:#12141A]"
-                size="sm"
-                closable
-                @close="
-                  filters.inStock = false;
-                  applyFilters();
-                "
-              >
-                {{ $t("pages.catalog.instock_filter_card.title") }}
-              </VcChip>
-            </template>
           </div>
 
           <!-- Products -->
           <template v-if="products.length || loading">
             <DisplayProducts
               :loading="loading"
-              :view-mode="isMobile ? 'grid' : viewMode"
+              :view-mode="isMobile ? 'grid' : savedViewMode"
               :items-per-page="itemsPerPage"
               :products="products"
               :class="
-                viewMode === 'list' && !isMobile
+                savedViewMode === 'list' && !isMobile
                   ? 'space-y-5'
                   : 'grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6 xl:gap-x-6 xl:gap-y-8'
               "
@@ -185,7 +222,7 @@
                 <VcButton
                   v-if="item.hasVariations"
                   :to="productsRoutes[item.id]"
-                  :class="{ 'w-full': viewMode === 'list' }"
+                  :class="{ 'w-full': savedViewMode === 'list' }"
                   class="uppercase mb-4"
                 >
                   {{ $t("pages.catalog.choose_button") }}
@@ -209,7 +246,7 @@
           <!-- Empty view -->
           <VcEmptyView
             :text="
-              isExistSelectedFacets || filters.inStock || keywordQueryParam !== ''
+              isExistSelectedFacets || savedInStock || savedBranches.length || keywordQueryParam
                 ? $t('pages.catalog.no_products_filtered_message')
                 : $t('pages.catalog.no_products_message')
             "
@@ -219,12 +256,13 @@
             <template #icon>
               <VcImage src="/static/images/common/stock.svg" :alt="$t('pages.catalog.products_icon')" />
             </template>
+
             <template #button>
               <VcButton
                 class="px-6 uppercase"
                 size="lg"
-                @click="resetFiltersWithKeyword"
-                v-if="isExistSelectedFacets || filters.inStock || keywordQueryParam !== ''"
+                @click="resetFacetFiltersWithKeyword"
+                v-if="isExistSelectedFacets || keywordQueryParam"
               >
                 <i class="fas fa-undo text-inherit -ml-0.5 mr-2.5"></i>
                 {{ $t("pages.catalog.no_products_button") }}
@@ -240,42 +278,51 @@
 <script setup lang="ts">
 import {
   computed,
-  ref,
-  shallowRef,
-  watch,
-  onMounted,
-  PropType,
   onBeforeUnmount,
-  WatchStopHandle,
-  toRef,
+  onMounted,
+  ref,
   shallowReactive,
+  shallowRef,
+  triggerRef,
+  watch,
+  WatchStopHandle,
 } from "vue";
-import { breakpointsTailwind, eagerComputed, useBreakpoints, whenever, useLocalStorage } from "@vueuse/core";
+import {
+  breakpointsTailwind,
+  computedEager,
+  eagerComputed,
+  useBreakpoints,
+  useLocalStorage,
+  watchDebounced,
+  whenever,
+} from "@vueuse/core";
 import {
   Breadcrumbs,
-  IBreadcrumbsItem,
+  CategorySelector,
   DisplayProducts,
-  toFilterExpression,
-  useCategories,
-  useProducts,
-  ViewMode,
-  ProductsSearchParams,
-  ProductsFilters,
-  useProductsRoutes,
+  getFilterExpressionForInStock,
+  getFilterExpressionFromFacets,
+  getFilterExpressionForAvailableIn,
+  IBreadcrumbsItem,
   ProductsFacet,
   ProductsFacetValue,
+  ProductsFilters,
   ProductsFiltersSidebar,
-  CategorySelector,
+  ProductsSearchParams,
+  useCategories,
+  useProducts,
+  useProductsRoutes,
+  ViewMode,
 } from "@/shared/catalog";
+import { BranchesDialog, FFC_LOCAL_STORAGE } from "@/shared/fulfillmentCenters";
 import { AddToCart } from "@/shared/cart";
-import { useElementVisibility, useRouteQueryParam } from "@/core/composables";
-import { DEFAULT_PAGE_SIZE, PRODUCT_SORTING_LIST } from "@/core/constants";
-import QueryParamName from "@/core/query-param-name.enum";
+import { useElementVisibility, usePageHead, useRouteQueryParam } from "@/core/composables";
+import { DEFAULT_PAGE_SIZE, PRODUCT_SORTING_LIST, QueryParamName } from "@/core/constants";
 import { useI18n } from "vue-i18n";
 import _ from "lodash";
+import { usePopup } from "@/shared/popup";
 
-const { t } = useI18n();
-
+const FILTERS_RESET_TIMEOUT_IN_MS = 500;
 const watchStopHandles: WatchStopHandle[] = [];
 
 const props = defineProps({
@@ -283,17 +330,12 @@ const props = defineProps({
     type: String,
     default: "",
   },
-
-  categorySeoUrls: {
-    type: [String, Array] as PropType<string | string[]>,
-    default: "",
-  },
 });
 
-const categoryId = toRef(props, "categoryId");
-
+const { openPopup } = usePopup();
 const breakpoints = useBreakpoints(breakpointsTailwind);
-const { selectedCategory, selectCategoryByKey, loadCategoriesTree, selectRoot } = useCategories();
+const { t } = useI18n();
+const { selectedCategory, selectCategoryByKey, selectRoot } = useCategories();
 const {
   fetchProducts,
   fetchMoreProducts,
@@ -304,28 +346,23 @@ const {
   products,
   total,
   pages,
-  filters,
-  clearFilters,
+  facets,
 } = useProducts({
   withFacets: true,
 });
 
+usePageHead({
+  title: computed(() => selectedCategory.value?.seoInfo?.pageTitle || selectedCategory.value?.label),
+  meta: {
+    keywords: computed(() => selectedCategory.value?.seoInfo?.metaKeywords),
+    description: computed(() => selectedCategory.value?.seoInfo?.metaDescription),
+  },
+});
+
 const productsRoutes = useProductsRoutes(products);
-
-const FILTERS_RESET_TIMEOUT_IN_MS = 500;
-
-const isMobile = breakpoints.smaller("md");
-const isMobileSidebar = breakpoints.smaller("lg");
-const mobileSidebarVisible = ref(false);
-const sidebarElement = shallowRef<HTMLElement | null>(null);
-const stickyMobileHeaderAnchor = shallowRef<HTMLElement | null>(null);
-const page = ref(1);
-const itemsPerPage = ref(DEFAULT_PAGE_SIZE);
-const mobileFilters = shallowReactive<ProductsFilters>({ facets: [], inStock: false });
-
-const stickyMobileHeaderAnchorIsVisible = useElementVisibility(stickyMobileHeaderAnchor, { direction: "top" });
-
-const viewMode = useLocalStorage<"grid" | "list">("viewMode", "grid");
+const savedViewMode = useLocalStorage<"grid" | "list">("viewMode", "grid");
+const savedInStock = useLocalStorage<boolean>("viewInStockProducts", true);
+const savedBranches = useLocalStorage<string[]>(FFC_LOCAL_STORAGE, []);
 
 const sortQueryParam = useRouteQueryParam<string>(QueryParamName.Sort, {
   defaultValue: PRODUCT_SORTING_LIST[0].id,
@@ -336,30 +373,62 @@ const keywordQueryParam = useRouteQueryParam<string>(QueryParamName.Keyword, {
   defaultValue: "",
 });
 
-const filterQueryParam = useRouteQueryParam<string>(QueryParamName.Filter, {
+const facetsQueryParam = useRouteQueryParam<string>(QueryParamName.Facets, {
   defaultValue: "",
 });
+
+const isMobile = breakpoints.smaller("md");
+const isMobileSidebar = breakpoints.smaller("lg");
+
+const stickyMobileHeaderAnchor = shallowRef<HTMLElement | null>(null);
+const stickyMobileHeaderAnchorIsVisible = useElementVisibility(stickyMobileHeaderAnchor, { direction: "top" });
+
+const page = ref(1);
+const itemsPerPage = ref(DEFAULT_PAGE_SIZE);
+
+const mobileSidebarVisible = ref(false);
+const mobileFilters = shallowReactive<ProductsFilters>({
+  facets: [],
+  inStock: savedInStock.value,
+  branches: savedBranches.value,
+});
+
+// region Computed properties
 
 const isVisibleStickyMobileHeader = computed<boolean>(
   () => !stickyMobileHeaderAnchorIsVisible.value && isMobileSidebar.value
 );
 
-const categorySeoUrl = computed<string>(() =>
-  typeof props.categorySeoUrls === "string"
-    ? props.categorySeoUrls
-    : props.categorySeoUrls?.[props.categorySeoUrls?.length - 1] ?? ""
-);
-
-const searchParams = computed<ProductsSearchParams>(() => ({
-  categoryId: selectedCategory.value?.id,
+const searchParams = computedEager<ProductsSearchParams>(() => ({
+  categoryId: props.categoryId,
   itemsPerPage: itemsPerPage.value,
   sort: sortQueryParam.value,
   keyword: keywordQueryParam.value,
-  filter: filterQueryParam.value,
+  filter: [
+    facetsQueryParam.value,
+    getFilterExpressionForInStock(savedInStock),
+    getFilterExpressionForAvailableIn(savedBranches),
+  ]
+    .filter(Boolean)
+    .join(" "),
 }));
 
 const isExistSelectedFacets = eagerComputed<boolean>(() =>
-  filters.facets.some((facet) => facet.values.some((value) => value.selected))
+  facets.value.some((facet) => facet.values.some((value) => value.selected))
+);
+
+const isExistSelectedMobileFacets = eagerComputed<boolean>(() =>
+  mobileFilters.facets.some((facet) => facet.values.some((value) => value.selected))
+);
+
+const isMobileFilterDirty = eagerComputed<boolean>(
+  () =>
+    JSON.stringify(mobileFilters) !==
+    JSON.stringify({
+      facets: facets.value,
+      inStock: savedInStock.value,
+      branches: savedBranches.value,
+    } as ProductsFilters)
 );
 
 const breadcrumbs = computed<IBreadcrumbsItem[]>(() => {
@@ -383,6 +452,21 @@ const breadcrumbs = computed<IBreadcrumbsItem[]>(() => {
   return items;
 });
 
+// endregion Computed properties
+
+// region Methods
+
+function showMobileSidebar() {
+  mobileFilters.facets = _.cloneDeep(facets.value);
+  mobileFilters.inStock = savedInStock.value;
+  mobileFilters.branches = savedBranches.value.slice();
+  mobileSidebarVisible.value = true;
+}
+
+function hideMobileSidebar() {
+  mobileSidebarVisible.value = false;
+}
+
 function onSearchStart(newKeyword: string) {
   const searchText = newKeyword;
 
@@ -391,44 +475,64 @@ function onSearchStart(newKeyword: string) {
   }
 }
 
-function onFilterChanged(newFilters: ProductsFilters) {
-  // checking for optimization
-  if (newFilters.inStock != filters.inStock) {
-    filters.inStock = newFilters.inStock;
-  } else {
-    filters.facets = _.cloneDeep(newFilters.facets);
+function applyFilters(newFilters: ProductsFilters) {
+  const facetsFilterExpression: string = getFilterExpressionFromFacets(newFilters.facets);
+
+  if (facetsQueryParam.value !== facetsFilterExpression) {
+    facetsQueryParam.value = facetsFilterExpression;
   }
 
-  if (!isMobileSidebar.value) {
-    applyFilters();
+  if (savedInStock.value !== newFilters.inStock) {
+    savedInStock.value = newFilters.inStock;
   }
-}
 
-function applyFilters() {
-  filterQueryParam.value = toFilterExpression(filters);
-}
-
-function removeFilterItem(payload: Pick<ProductsFacet, "paramName"> & Pick<ProductsFacetValue, "value">) {
-  const filter = filters.facets.find((item) => item.paramName === payload.paramName);
-  const filterItem = filter?.values.find((item) => item.value === payload.value);
-
-  if (filterItem) {
-    filterItem.selected = false;
-    applyFilters();
+  if (!_.isEqual(savedBranches.value, newFilters.branches)) {
+    savedBranches.value = newFilters.branches;
   }
 }
 
-function resetFilters() {
-  clearFilters();
+async function updateMobileFilters(newFilters: ProductsFilters) {
+  const searchParamsForFacets: ProductsSearchParams = {
+    ...searchParams.value,
+    filter: [
+      getFilterExpressionFromFacets(newFilters.facets),
+      getFilterExpressionForInStock(newFilters.inStock),
+      getFilterExpressionForAvailableIn(newFilters.branches),
+    ]
+      .filter(Boolean)
+      .join(" "),
+  };
 
-  applyFilters();
+  mobileFilters.inStock = newFilters.inStock;
+  mobileFilters.branches = newFilters.branches;
+  mobileFilters.facets = await getFacets(searchParamsForFacets);
 }
 
-function resetFiltersWithKeyword() {
+function removeFacetFilterItem(payload: Pick<ProductsFacet, "paramName"> & Pick<ProductsFacetValue, "value">) {
+  const facet = facets.value.find((item) => item.paramName === payload.paramName);
+  const facetValue = facet?.values.find((item) => item.value === payload.value);
+
+  if (facetValue) {
+    facetValue.selected = false;
+    facetsQueryParam.value = getFilterExpressionFromFacets(facets);
+
+    // Instant update of the filter chips
+    triggerRef(facets);
+  }
+}
+
+function resetFacetFilters() {
+  facetsQueryParam.value = "";
+
+  // Instant update of the filter chips
+  facets.value.forEach((filter) => filter.values.forEach((filterItem) => (filterItem.selected = false)));
+  triggerRef(facets);
+}
+
+function resetFacetFiltersWithKeyword() {
   keywordQueryParam.value = "";
-  setTimeout(() => {
-    resetFilters();
-  }, FILTERS_RESET_TIMEOUT_IN_MS);
+  // FIXME: `setTimeout` is a hack to apply the value of `useRouteQueryParam` in parallel
+  setTimeout(resetFacetFilters, FILTERS_RESET_TIMEOUT_IN_MS);
 }
 
 async function loadProducts() {
@@ -451,27 +555,44 @@ async function loadMoreProducts() {
   });
 }
 
-function onChangeCurrentCategory(key: string, value: string) {
-  clearFilters();
-  selectCategoryByKey(key, value);
+function selectCategory(id?: string) {
+  if (id) {
+    selectCategoryByKey("id", id);
+  } else {
+    selectRoot();
+  }
 }
 
+function openBranchesDialog(fromMobileFilter: boolean) {
+  openPopup({
+    component: BranchesDialog,
+    props: {
+      selectedBranches: fromMobileFilter ? mobileFilters.branches : savedBranches.value,
+      onSave(branches: string[]) {
+        if (fromMobileFilter) {
+          const newFilters: ProductsFilters = {
+            branches,
+            facets: mobileFilters.facets,
+            inStock: mobileFilters.inStock,
+          };
+
+          updateMobileFilters(newFilters);
+        } else {
+          savedBranches.value = branches;
+        }
+      },
+    },
+  });
+}
+
+// endregion Methods
+
+// region Lifecycle Hooks
+
 onMounted(async () => {
-  await loadCategoriesTree();
-
-  if (!categoryId.value && !categorySeoUrl.value) {
-    selectRoot();
-  } else if (categoryId.value) {
-    selectCategoryByKey("id", categoryId.value);
-    watch(categoryId, (value) => onChangeCurrentCategory("id", value));
-  } else {
-    selectCategoryByKey("seoUrl", categorySeoUrl.value);
-    watch(categorySeoUrl, (value) => onChangeCurrentCategory("seoUrl", value));
-  }
-
+  selectCategory(props.categoryId);
   await loadProducts();
 
-  // Todo: Use in place products loading instead of trigger by watching a computed property searchParams https://virtocommerce.atlassian.net/browse/ST-2255
   // Start change tracking after initial data load
   watchStopHandles.push(
     /**
@@ -482,12 +603,18 @@ onMounted(async () => {
      * Related links:
      * https://github.com/vuejs/core/issues/2291
      */
-    watch(
+    // TODO: (ST-2255) Use in place products loading instead of trigger by watching a computed property `searchParams`
+    watchDebounced(
       computed(() => JSON.stringify(searchParams.value)),
       loadProducts,
       {
         flush: "post",
+        debounce: 20,
       }
+    ),
+    watch(
+      () => props.categoryId,
+      (value) => selectCategory(value)
     )
   );
 });
@@ -496,50 +623,7 @@ onBeforeUnmount(() => {
   watchStopHandles.forEach((watchStopHandle) => watchStopHandle());
 });
 
-//#region Mobile filters logic
-
-const isExistSelectedMobileFacets = eagerComputed<boolean>(() =>
-  mobileFilters.facets.some((facet) => facet.values.some((value) => value.selected))
-);
-
-const isMobileFilterDirty = eagerComputed<boolean>(() => JSON.stringify(mobileFilters) !== JSON.stringify(filters));
-
-async function onMobileFilterChanged(newFilters: ProductsFilters) {
-  const searchParamsForFacets = _.cloneDeep(searchParams.value);
-  searchParamsForFacets.filter = toFilterExpression(newFilters);
-  const newFacets = await getFacets(searchParamsForFacets);
-  mobileFilters.facets = newFacets;
-  mobileFilters.inStock = newFilters.inStock;
-}
-
-function showMobileSidebar() {
-  mobileFilters.facets = _.cloneDeep<ProductsFacet[]>(filters.facets);
-  mobileFilters.inStock = filters.inStock;
-
-  mobileSidebarVisible.value = true;
-}
-
-function applyMobileFiltersAndHideSidebar() {
-  if (JSON.stringify(mobileFilters.facets) !== JSON.stringify(filters.facets)) {
-    filters.facets = mobileFilters.facets;
-  }
-
-  if (mobileFilters.inStock !== filters.inStock) {
-    filters.inStock = mobileFilters.inStock;
-  }
-
-  hideMobileSidebar();
-  applyFilters();
-}
-
-function hideMobileSidebar() {
-  mobileSidebarVisible.value = false;
-
-  if (sidebarElement.value) {
-    sidebarElement.value.scrollTop = 0;
-  }
-}
+// endregion Lifecycle Hooks
 
 whenever(() => !isMobileSidebar.value, hideMobileSidebar);
-//#endregion Mobile filters logic
 </script>

@@ -9,7 +9,7 @@
     <VcPopupSidebar class="px-5 pt-12 w-72" :is-visible="isMobile && filtersVisible" @hide="hideFilters">
       <div class="relative">
         <button class="absolute -right-3 appearance-none px-3 py-1" @click="hideFilters">
-          <span class="text-2xl fa fa-times text-[color:var(--color-primary)]"></span>
+          <span class="text-2xl fas fa-times text-red-400 hover:text-red-700"></span>
         </button>
       </div>
 
@@ -65,8 +65,8 @@
           v-if="filtersVisible && !isMobile"
           class="absolute right-0 z-10 bg-white shadow-lg pb-6 rounded border border-gray-300 overflow-hidden mt-2"
         >
-          <button class="absolute right-0 appearance-none px-4 py-2" @click="hideFilters">
-            <span class="fa fa-times text-[color:var(--color-primary)]"></span>
+          <button class="absolute right-0 appearance-none mr-4 mt-2" @click="hideFilters">
+            <span class="text-lg fa fa-times text-red-400 hover:text-red-700"></span>
           </button>
 
           <OrdersFilter ref="filtersElement" class="px-8 pt-9" @change="filterChanged()" />
@@ -74,13 +74,21 @@
       </div>
 
       <div class="flex flex-grow mr-5 md:mx-0">
-        <input
-          v-model.trim="keyword"
-          :disabled="ordersLoading"
-          type="search"
-          class="flex-grow appearance-none bg-white rounded rounded-r-none h-11 px-4 font-medium outline-none text-sm border border-gray-300 focus:border-gray-400 disabled:bg-gray-200"
-          @keypress.enter="applyKeyword"
-        />
+        <div class="relative grow">
+          <input
+            v-model.trim="keyword"
+            :disabled="ordersLoading"
+            class="w-full appearance-none bg-white rounded rounded-r-none h-11 px-4 font-medium outline-none text-sm border border-gray-300 focus:border-gray-400 disabled:bg-gray-200"
+            @keypress.enter="applyKeyword"
+            :placeholder="$t('pages.account.orders.search_placeholder')"
+          />
+
+          <button v-if="keyword" class="absolute right-[14px] top-[14px]" @click="resetKeyword">
+            <svg class="text-[color:var(--color-primary)]" height="14" width="14">
+              <use href="/static/images/delete.svg#main" />
+            </svg>
+          </button>
+        </div>
 
         <VcButton :is-disabled="ordersLoading" class="px-4 !rounded-l-none uppercase" size="lg" @click="applyKeyword">
           <i class="fas fa-search text-lg" />
@@ -165,7 +173,7 @@
             <div class="flex flex-col">
               <span class="text-sm text-gray-400" v-t="'pages.account.orders.total_label'" />
 
-              <span class="overflow-hidden overflow-ellipsis">
+              <span class="overflow-hidden overflow-ellipsis font-extrabold">
                 {{ itemData.item.total?.formattedAmount }}
               </span>
             </div>
@@ -263,17 +271,16 @@
 
 <script setup lang="ts">
 import { OrdersFilter, MobileOrdersFilter, useUserOrdersFilter, useUserOrders } from "@/shared/account";
-
 import { onMounted, ref, shallowRef, watch } from "vue";
-import { SORT_ASCENDING, SORT_DESCENDING } from "@/core/constants";
 import { breakpointsTailwind, useBreakpoints, onClickOutside } from "@vueuse/core";
-
+import { getNewSorting } from "@/core/utilities";
 import { useRouter } from "vue-router";
 import { CustomerOrderType } from "@/xapi/types";
 import { useI18n } from "vue-i18n";
+import { usePageHead } from "@/core/composables";
 
 const { t } = useI18n();
-
+const router = useRouter();
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const { loading: ordersLoading, orders, loadOrders, sort, pages, itemsPerPage, page, keyword } = useUserOrders();
 
@@ -288,9 +295,11 @@ const {
   removeFilterChipsItem,
 } = useUserOrdersFilter();
 
-const isMobile = breakpoints.smaller("lg");
+usePageHead({
+  title: t("pages.account.orders.meta.title"),
+});
 
-const router = useRouter();
+const isMobile = breakpoints.smaller("lg");
 
 const openOrderDetails = (item: CustomerOrderType) => {
   router.push({ name: "OrderDetails", params: { orderId: item.id } });
@@ -307,17 +316,12 @@ watch(
 
 const onPageChange = async (newPage: number) => {
   page.value = newPage;
+  window.scroll({ top: 0, behavior: "smooth" });
   await loadOrders();
 };
 
 const applySorting = async (column: string) => {
-  if (sort.value.column === column) {
-    sort.value.direction = sort.value.direction === SORT_DESCENDING ? SORT_ASCENDING : SORT_DESCENDING;
-  } else {
-    sort.value.column = column;
-    sort.value.direction = SORT_DESCENDING;
-  }
-
+  sort.value = getNewSorting(sort.value, column);
   page.value = 1;
   await loadOrders();
 };
@@ -335,7 +339,6 @@ const resetFiltersWithKeyword = async () => {
 
 onMounted(async () => {
   resetFilters();
-  await loadOrders();
 });
 
 const columns = ref<ITableColumn[]>([
@@ -361,13 +364,13 @@ const columns = ref<ITableColumn[]>([
     id: "status",
     title: t("pages.account.orders.status_label"),
     sortable: true,
-    titlePosition: "text-center",
+    align: "center",
   },
   {
     id: "total",
     title: t("pages.account.orders.total_label"),
     sortable: true,
-    titlePosition: "text-right",
+    align: "right",
   },
 ]);
 
@@ -397,5 +400,10 @@ onClickOutside(
 
 function filterChanged() {
   hideFilters();
+}
+
+async function resetKeyword() {
+  keyword.value = "";
+  await applyKeyword();
 }
 </script>

@@ -2,9 +2,18 @@ query GetWishlist($listId: String!) {
   wishlist(listId: $listId) {
     name
     id
-    itemsCount
     items {
       id
+      name
+      imageUrl
+      salePrice {
+        amount
+        formattedAmount
+      }
+      listPrice {
+        amount
+        formattedAmount
+      }
       product {
         name
         id

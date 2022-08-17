@@ -38,9 +38,10 @@ declare global {
 
   interface ITableColumn {
     id: string;
-    title: string;
+    title?: string;
     sortable?: boolean;
-    titlePosition?: "text-center" | "text-right" | "text-left";
+    align?: "center" | "right" | "left";
+    classes?: string;
   }
 
   interface IProductProperties {

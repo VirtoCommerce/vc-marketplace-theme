@@ -24,19 +24,14 @@ export type SignMeUp = {
 };
 
 export type SignMeIn = {
-  userName: string;
+  email: string;
   password: string;
   rememberMe?: boolean;
 };
 
 export type ForgotPassword = {
   email: string;
-  resetPasswordUrl: string;
-};
-
-export type ValidateToken = {
-  userId: string;
-  token: string;
+  resetPasswordUrlPath: string;
 };
 
 export type ResetPassword = {
@@ -44,11 +39,6 @@ export type ResetPassword = {
   token: string;
   password: string;
 };
-
-export interface ISortInfo {
-  column: string;
-  direction: string;
-}
 
 export type CheckoutDefaults = {
   deliveryMethod?: string;
