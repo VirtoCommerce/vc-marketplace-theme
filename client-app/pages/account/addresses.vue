@@ -32,9 +32,8 @@
       </template>
 
       <template #button>
-        <VcButton class="px-6 uppercase" size="lg" @click="openEditMode">
-          <i class="fa fa-plus text-inherit -ml-0.5 mr-2.5" />
-
+        <VcButton class="px-4 uppercase" size="lg" @click="openEditMode">
+          <i class="fa fa-plus -ml-px mr-3" />
           {{ $t("pages.account.addresses.add_new_address_button") }}
         </VcButton>
       </template>
@@ -51,7 +50,7 @@
         required-city
         @save="saveAddress"
       >
-        <template #append="{ dirty }">
+        <template #append="{ dirty, valid }">
           <div class="flex space-x-4 pb-3 pt-7 sm:pb-4 sm:pt-4 sm:float-right">
             <VcButton
               kind="secondary"
@@ -64,7 +63,7 @@
             </VcButton>
 
             <VcButton
-              :is-disabled="!dirty"
+              :is-disabled="!dirty || !valid"
               :is-waiting="saveAddressLoading"
               class="uppercase flex-grow sm:flex-none sm:px-16"
               is-submit
@@ -178,6 +177,7 @@
                   type="button"
                   class="h-7 w-7 shadow rounded text-[color:var(--color-primary)] hover:bg-gray-100"
                   @click="openEditMode(address)"
+                  :title="$t('pages.account.addresses.edit_label')"
                 >
                   <i class="fas fa-pencil-alt" />
                 </button>
@@ -186,6 +186,7 @@
                   type="button"
                   class="h-7 w-7 shadow rounded text-[color:var(--color-danger)] hover:bg-gray-100"
                   @click="removeAddress(address)"
+                  :title="$t('pages.account.addresses.delete_label')"
                 >
                   <i class="fas fa-times" />
                 </button>
@@ -227,15 +228,14 @@ import { AddressForm, useUser, useUserAddresses } from "@/shared/account";
 import { computed, ComputedRef, onMounted, Ref, ref } from "vue";
 import { clone } from "lodash";
 import { MemberAddressType } from "@/xapi/types";
-import { SORT_ASCENDING, SORT_DESCENDING } from "@/core/constants";
+import { getNewSorting } from "@/core/utilities";
 import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 import { BackButtonInHeader } from "@/shared/layout";
-import { useCountries } from "@/core/composables";
+import { useCountries, usePageHead } from "@/core/composables";
 import { AddressType } from "@/core/types";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
-
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const { user } = useUser();
 const { countries, loadCountries } = useCountries();
@@ -249,6 +249,10 @@ const {
   defaultShippingAddress,
   addOrUpdateAddresses,
 } = useUserAddresses({ user });
+
+usePageHead({
+  title: t("pages.account.addresses.meta.title"),
+});
 
 const isMobile = breakpoints.smaller("lg");
 const editingMode: Ref<boolean> = ref(false);
@@ -295,7 +299,7 @@ const columns = ref<ITableColumn[]>([
   {
     id: "actions",
     title: t("pages.account.addresses.actions_label"),
-    titlePosition: "text-center",
+    align: "center",
   },
 ]);
 
@@ -350,13 +354,7 @@ function actionBuilder(address: MemberAddressType) {
 }
 
 const applySorting = async (column: string): Promise<void> => {
-  if (sort.value.column === column) {
-    sort.value.direction = sort.value.direction === SORT_DESCENDING ? SORT_ASCENDING : SORT_DESCENDING;
-  } else {
-    sort.value.column = column;
-    sort.value.direction = SORT_DESCENDING;
-  }
-
+  sort.value = getNewSorting(sort.value, column);
   page.value = 1;
   await loadAddresses();
 };

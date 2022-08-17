@@ -16,18 +16,18 @@
       </ProductTitledBlock>
 
       <!-- variations  -->
-      <div v-if="product.variations?.length" class="mt-5">
-        <ProductVariationCard class="mb-5" :variation="product" v-if="product.price?.actual?.amount" />
+      <ProductTitledBlock
+        v-if="product.variations?.length"
+        class="mt-5"
+        image-src="/static/images/variations_customize.svg"
+        :title="$t('shared.catalog.product_details.variations_block_title')"
+      >
+        <ProductVariationCard class="mb-5" :variation="product" />
 
         <div v-for="(variation, i) in product.variations" :key="variation?.id ?? i">
-          <ProductVariationCard
-            v-if="variation && variation.price?.actual?.amount"
-            class="mb-5"
-            :variation="variation"
-            :product="product"
-          />
+          <ProductVariationCard v-if="variation" class="mb-5" :variation="variation" :product="product" />
         </div>
-      </div>
+      </ProductTitledBlock>
 
       <ProductTitledBlock
         v-if="product.description"

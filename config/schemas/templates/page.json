@@ -1,6 +1,17 @@
 {
-  "name": "Page",
-  "previewUrl": "/demo-page",
-  "path": "content/pages/page.json",
-  "sections": ["image", "text"]
+  "name": "Pages",
+  "previewUrl": "",
+  "request": [
+    {
+      "url": "/api/pagebuilder/search?storeId=B2B-store&type=pages&query=*.page",
+      "method": "get",
+      "cacheable": true,
+      "response": {
+        "selector": "Object.keys(this.response).map(x => ({ ...this.item, ...this.response[x], request: undefined })).reduce((acc, x) => ({ ...acc, [x.name]: x }), {})",
+        "isArray": true
+      }
+    }
+  ],
+  "type": "pages",
+  "sections": ["image", "text", "header-settings"]
 }

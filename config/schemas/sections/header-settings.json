@@ -1,0 +1,31 @@
+{
+  "name": "Header settings",
+  "icon": "construction",
+  "displayField": "default",
+  "static": "top",
+  "settings": [
+    {
+      "id": "seoInfo",
+      "type": "object",
+      "title": "SEO info",
+      "element": [
+        {
+          "id": "pageTitle",
+          "label": "Page title",
+          "type": "string"
+        },
+        {
+          "id": "metaKeywords",
+          "label": "Meta keywords",
+          "type": "string"
+        },
+        {
+          "id": "metaDescription",
+          "label": "Meta description",
+          "type": "string",
+          "multiline": true
+        }
+      ]
+    }
+  ]
+}

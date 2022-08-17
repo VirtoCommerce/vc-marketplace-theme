@@ -1,4 +1,5 @@
 import { IThemeConfigPreset, IThemeContext } from "@/core/types";
+import { StorefrontPermissions } from "@/core/constants";
 
 declare module "*.vue" {
   import { DefineComponent } from "vue";
@@ -10,13 +11,7 @@ declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
     $cfg: IThemeConfigPreset;
     $context: IThemeContext;
-  }
-}
-
-declare module "vue-router" {
-  interface RouteMeta {
-    layout?: "Main" | "Payment";
-    requiresAuth?: boolean;
-    hideNavigation?: boolean;
+    $permissions: typeof StorefrontPermissions;
+    $can: (...permissions: string[]) => boolean;
   }
 }
